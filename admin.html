@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — คลังสมุนไพรไทย</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green-deep:#1a3a2a; --green-mid:#2d6a4f; --green-light:#52b788;
+  --gold:#c9a84c; --cream:#f5f0e8; --paper:#faf7f0;
+  --ink:#1c1c1c; --muted:#6b7c6e; --danger:#e74c3c; --success:#27ae60;
+  --border:#e0ebe4; --white:#ffffff;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Sarabun',sans-serif;background:#f0f4f1;color:var(--ink);min-height:100vh}
+
+/* ── LOGIN SCREEN ── */
+.login-screen {
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  background:var(--green-deep);
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(82,183,136,.15) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(201,168,76,.1) 0%, transparent 50%);
+}
+.login-card {
+  background:white; border-radius:24px; padding:3rem 3.5rem;
+  max-width:440px; width:100%; text-align:center;
+  box-shadow:0 30px 80px rgba(0,0,0,.25);
+  animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both;
+}
+.login-logo { font-size:3rem; margin-bottom:1rem; }
+.login-title { font-family:'Playfair Display',serif; font-size:1.8rem; color:var(--green-deep); margin-bottom:.3rem; }
+.login-sub { font-size:.88rem; color:var(--muted); margin-bottom:2rem; line-height:1.6; }
+.login-divider { display:flex; align-items:center; gap:1rem; margin:1.5rem 0; }
+.login-divider::before,.login-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+.login-divider span { font-size:.75rem; color:var(--muted); letter-spacing:.05em; }
+
+.btn-google {
+  width:100%; padding:1rem; border-radius:12px;
+  border:2px solid var(--border); background:white;
+  display:flex; align-items:center; justify-content:center; gap:.85rem;
+  font-family:'Sarabun',sans-serif; font-size:1rem; font-weight:600;
+  color:var(--ink); cursor:pointer; transition:all .25s;
+}
+.btn-google:hover { border-color:var(--green-light); background:#f8fffe; transform:translateY(-1px); box-shadow:0 6px 20px rgba(82,183,136,.2); }
+.google-icon { width:22px; height:22px; }
+
+.btn-demo {
+  width:100%; margin-top:.75rem; padding:.85rem;
+  border-radius:12px; border:none;
+  background:linear-gradient(135deg, var(--green-mid), var(--green-light));
+  color:white; font-family:'Sarabun',sans-serif; font-size:.95rem; font-weight:700;
+  cursor:pointer; transition:all .25s; letter-spacing:.03em;
+}
+.btn-demo:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(45,106,79,.35); }
+
+.config-note {
+  margin-top:1.5rem; background:#fff8e1; border-radius:10px;
+  padding:.85rem 1rem; font-size:.78rem; color:#7a5c00; line-height:1.65; text-align:left;
+}
+.config-note strong { color:var(--green-deep); }
+
+/* ── MAIN LAYOUT ── */
+.app { display:none; min-height:100vh; }
+.app.visible { display:flex; flex-direction:column; }
+
+/* TOP BAR */
+.topbar {
+  background:var(--green-deep); padding:.85rem 2rem;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:100;
+  box-shadow:0 2px 12px rgba(0,0,0,.2);
+}
+.topbar-logo { font-family:'Playfair Display',serif; color:var(--gold); font-size:1.2rem; display:flex; align-items:center; gap:.6rem; }
+.topbar-user { display:flex; align-items:center; gap:1rem; }
+.user-avatar { width:36px; height:36px; border-radius:50%; border:2px solid var(--gold); object-fit:cover; background:var(--green-mid); display:flex; align-items:center; justify-content:center; font-size:1rem; color:white; overflow:hidden; }
+.user-name { color:rgba(245,240,232,.8); font-size:.85rem; }
+.btn-logout { padding:.4rem 1rem; border-radius:20px; border:1px solid rgba(245,240,232,.3); background:transparent; color:rgba(245,240,232,.7); font-family:'Sarabun',sans-serif; font-size:.8rem; cursor:pointer; transition:all .2s; }
+.btn-logout:hover { background:rgba(245,240,232,.1); color:white; }
+
+/* CONTENT */
+.content { display:flex; flex:1; }
+
+/* SIDEBAR */
+.sidebar {
+  width:220px; flex-shrink:0; background:white;
+  border-right:1px solid var(--border); padding:1.5rem 0;
+  position:sticky; top:56px; height:calc(100vh - 56px); overflow-y:auto;
+}
+.sidebar-section { padding:0 1.2rem; margin-bottom:1.5rem; }
+.sidebar-label { font-size:.68rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); font-weight:700; margin-bottom:.6rem; padding:0 .4rem; }
+.nav-item {
+  display:flex; align-items:center; gap:.7rem;
+  padding:.6rem .9rem; border-radius:10px; cursor:pointer;
+  font-size:.9rem; color:var(--muted); transition:all .2s; margin-bottom:.2rem;
+}
+.nav-item:hover { background:#f0f7f4; color:var(--green-mid); }
+.nav-item.active { background:#e8f5e9; color:var(--green-mid); font-weight:700; }
+.nav-item .icon { font-size:1.1rem; width:22px; text-align:center; }
+.nav-badge { margin-left:auto; background:var(--green-light); color:white; font-size:.65rem; font-weight:700; padding:.15rem .5rem; border-radius:20px; min-width:22px; text-align:center; }
+
+/* MAIN PANEL */
+.main { flex:1; padding:2rem; overflow-y:auto; }
+
+.page { display:none; }
+.page.active { display:block; animation:fadeIn .3s ease; }
+
+.page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:2rem; }
+.page-title { font-family:'Playfair Display',serif; font-size:1.8rem; color:var(--green-deep); }
+.page-subtitle { font-size:.85rem; color:var(--muted); margin-top:.2rem; }
+
+/* STATS CARDS */
+.stats-row { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:1rem; margin-bottom:2rem; }
+.stat-card { background:white; border-radius:14px; padding:1.3rem 1.5rem; border:1px solid var(--border); }
+.stat-card-num { font-family:'Playfair Display',serif; font-size:2.2rem; color:var(--green-mid); line-height:1; }
+.stat-card-label { font-size:.82rem; color:var(--muted); margin-top:.3rem; }
+.stat-card-icon { font-size:1.8rem; margin-bottom:.5rem; }
+
+/* BUTTONS */
+.btn { padding:.65rem 1.4rem; border-radius:10px; border:none; cursor:pointer; font-family:'Sarabun',sans-serif; font-size:.9rem; font-weight:600; transition:all .2s; display:inline-flex; align-items:center; gap:.5rem; }
+.btn-primary { background:var(--green-mid); color:white; }
+.btn-primary:hover { background:var(--green-deep); transform:translateY(-1px); box-shadow:0 4px 14px rgba(45,106,79,.3); }
+.btn-secondary { background:#f0f4f1; color:var(--green-mid); border:1px solid var(--border); }
+.btn-secondary:hover { background:#e8f5e9; }
+.btn-danger { background:#fff0f0; color:var(--danger); border:1px solid #ffd5d5; }
+.btn-danger:hover { background:var(--danger); color:white; }
+.btn-gold { background:var(--gold); color:var(--green-deep); }
+.btn-gold:hover { background:#b8953e; transform:translateY(-1px); }
+.btn-sm { padding:.4rem .9rem; font-size:.8rem; border-radius:8px; }
+
+/* TABLE */
+.table-card { background:white; border-radius:16px; border:1px solid var(--border); overflow:hidden; }
+.table-toolbar { padding:1rem 1.5rem; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+.search-box { flex:1; min-width:200px; position:relative; }
+.search-box input { width:100%; padding:.55rem 1rem .55rem 2.5rem; border-radius:8px; border:1px solid var(--border); font-family:'Sarabun',sans-serif; font-size:.88rem; background:#f8faf9; outline:none; transition:all .2s; }
+.search-box input:focus { border-color:var(--green-light); background:white; }
+.search-box::before { content:'🔍'; position:absolute; left:.75rem; top:50%; transform:translateY(-50%); font-size:.85rem; opacity:.5; }
+.data-table { width:100%; border-collapse:collapse; }
+.data-table th { padding:.75rem 1.2rem; text-align:left; font-size:.73rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:700; background:#f8faf9; border-bottom:1px solid var(--border); }
+.data-table td { padding:.9rem 1.2rem; font-size:.88rem; border-bottom:1px solid #f0f4f1; vertical-align:middle; }
+.data-table tr:last-child td { border-bottom:none; }
+.data-table tr:hover td { background:#f8fffe; }
+.herb-thumb { width:44px; height:44px; border-radius:8px; object-fit:cover; background:#e8f5e9; display:flex; align-items:center; justify-content:center; font-size:1.3rem; overflow:hidden; flex-shrink:0; }
+.herb-thumb img { width:100%; height:100%; object-fit:cover; }
+.herb-cell { display:flex; align-items:center; gap:.85rem; }
+.herb-cell-name { font-weight:700; color:var(--green-deep); }
+.herb-cell-en { font-size:.78rem; color:var(--muted); font-style:italic; }
+.tag-pill { display:inline-block; padding:.15rem .6rem; border-radius:20px; font-size:.72rem; font-weight:600; background:#e8f5e9; color:var(--green-mid); margin:.1rem; }
+.tag-hot { background:#fff3e0; color:#e65100; }
+.tag-cool { background:#e3f2fd; color:#1565c0; }
+.actions { display:flex; gap:.4rem; }
+.loading-row td { text-align:center; padding:3rem; color:var(--muted); }
+.empty-row td { text-align:center; padding:3rem; color:var(--muted); }
+
+/* MODAL / DRAWER */
+.drawer-overlay { position:fixed; inset:0; z-index:300; background:rgba(0,0,0,.45); backdrop-filter:blur(4px); display:none; }
+.drawer-overlay.open { display:block; }
+.drawer { position:fixed; right:0; top:0; bottom:0; width:min(680px,100vw); background:white; z-index:301; overflow-y:auto; box-shadow:-10px 0 40px rgba(0,0,0,.15); transform:translateX(100%); transition:transform .3s cubic-bezier(.4,0,.2,1); }
+.drawer.open { transform:translateX(0); }
+.drawer-header { padding:1.5rem 2rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:white; z-index:10; }
+.drawer-title { font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--green-deep); }
+.drawer-close { width:36px; height:36px; border-radius:50%; background:#f0f4f1; border:none; cursor:pointer; font-size:1.1rem; display:flex; align-items:center; justify-content:center; transition:background .2s; }
+.drawer-close:hover { background:var(--border); }
+.drawer-body { padding:2rem; }
+.drawer-footer { padding:1.2rem 2rem; border-top:1px solid var(--border); display:flex; gap:.75rem; justify-content:flex-end; position:sticky; bottom:0; background:white; }
+
+/* FORM */
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
+.form-grid .span2 { grid-column:1/-1; }
+.form-group { display:flex; flex-direction:column; gap:.45rem; }
+.form-label { font-size:.8rem; font-weight:700; color:var(--green-deep); letter-spacing:.04em; }
+.form-label .req { color:var(--danger); margin-left:.2rem; }
+.form-input, .form-select, .form-textarea {
+  padding:.7rem 1rem; border-radius:10px; border:1.5px solid var(--border);
+  font-family:'Sarabun',sans-serif; font-size:.9rem; background:white;
+  outline:none; transition:all .2s; color:var(--ink);
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color:var(--green-light); box-shadow:0 0 0 3px rgba(82,183,136,.12); }
+.form-textarea { resize:vertical; min-height:90px; line-height:1.6; }
+.form-hint { font-size:.75rem; color:var(--muted); }
+
+/* IMAGE UPLOAD */
+.img-upload-area {
+  border:2px dashed var(--border); border-radius:12px;
+  padding:1.5rem; text-align:center; cursor:pointer;
+  transition:all .25s; background:#f8faf9;
+}
+.img-upload-area:hover { border-color:var(--green-light); background:#f0faf5; }
+.img-upload-area.dragover { border-color:var(--green-mid); background:#e8f5e9; }
+.img-preview { width:100%; max-height:180px; object-fit:cover; border-radius:8px; margin-top:.75rem; display:none; }
+.img-preview.show { display:block; }
+.img-upload-icon { font-size:2rem; margin-bottom:.5rem; }
+.img-upload-text { font-size:.85rem; color:var(--muted); }
+.img-upload-text strong { color:var(--green-mid); cursor:pointer; }
+#imgFileInput { display:none; }
+
+/* TAG INPUT */
+.tag-input-wrap { display:flex; flex-wrap:wrap; gap:.4rem; padding:.5rem .8rem; border:1.5px solid var(--border); border-radius:10px; min-height:42px; cursor:text; background:white; transition:all .2s; }
+.tag-input-wrap:focus-within { border-color:var(--green-light); box-shadow:0 0 0 3px rgba(82,183,136,.12); }
+.tag-item { background:#e8f5e9; color:var(--green-mid); border-radius:20px; padding:.18rem .65rem; font-size:.82rem; font-weight:600; display:flex; align-items:center; gap:.35rem; }
+.tag-remove { cursor:pointer; opacity:.6; font-size:.9rem; line-height:1; }
+.tag-remove:hover { opacity:1; }
+.tag-input { border:none; outline:none; font-family:'Sarabun',sans-serif; font-size:.88rem; flex:1; min-width:80px; background:transparent; }
+
+/* TOAST */
+.toast-container { position:fixed; bottom:2rem; right:2rem; z-index:500; display:flex; flex-direction:column; gap:.6rem; }
+.toast { padding:.9rem 1.4rem; border-radius:12px; font-size:.9rem; font-weight:600; display:flex; align-items:center; gap:.75rem; box-shadow:0 8px 24px rgba(0,0,0,.15); animation:slideInRight .3s ease; max-width:340px; }
+.toast-success { background:var(--success); color:white; }
+.toast-error { background:var(--danger); color:white; }
+.toast-info { background:var(--green-mid); color:white; }
+
+/* CONFIRM DIALOG */
+.confirm-overlay { position:fixed; inset:0; z-index:400; background:rgba(0,0,0,.5); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; }
+.confirm-overlay.open { display:flex; }
+.confirm-box { background:white; border-radius:20px; padding:2rem 2.5rem; max-width:380px; width:100%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.2); animation:popIn .3s cubic-bezier(.34,1.56,.64,1); }
+.confirm-icon { font-size:2.5rem; margin-bottom:1rem; }
+.confirm-title { font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--green-deep); margin-bottom:.5rem; }
+.confirm-text { font-size:.88rem; color:var(--muted); line-height:1.6; margin-bottom:1.5rem; }
+.confirm-btns { display:flex; gap:.75rem; justify-content:center; }
+
+/* PROGRESS */
+.progress-bar { height:3px; background:var(--green-light); position:fixed; top:0; left:0; z-index:999; transition:width .3s ease; border-radius:0 2px 2px 0; }
+
+/* ANIMATIONS */
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+@keyframes popIn { from{opacity:0;transform:scale(.85)} to{opacity:1;transform:scale(1)} }
+@keyframes slideInRight { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+
+@media(max-width:768px) {
+  .sidebar{display:none}
+  .form-grid{grid-template-columns:1fr}
+  .drawer{width:100vw}
+  .stats-row{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar" style="width:0"></div>
+
+<!-- ═══════════════════════════════════════ LOGIN ═══════════════════════════════════════ -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">🌿</div>
+    <h1 class="login-title">สมุนไพรไทย</h1>
+    <p class="login-sub">Admin Panel · จัดการคลังความรู้สมุนไพร<br>เข้าสู่ระบบด้วย Google Account ของคุณ</p>
+
+    <button class="btn-google" onclick="signInWithGoogle()">
+      <svg class="google-icon" viewBox="0 0 24 24">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      เข้าสู่ระบบด้วย Google
+    </button>
+
+    <div class="login-divider"><span>หรือ</span></div>
+
+    <button class="btn-demo" onclick="demoLogin()">
+      🌿 ทดลองใช้งาน (Demo Mode)
+    </button>
+
+    <div class="config-note">
+      <strong>⚙️ สำหรับการใช้งานจริง:</strong> ต้องตั้งค่า Google OAuth Client ID ก่อน
+      โดยแทนที่ <code>YOUR_CLIENT_ID</code> ในโค้ดด้วย Client ID จริงของคุณ
+      ดูคู่มือการตั้งค่าได้ใน <strong>setup-guide.html</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ APP ═══════════════════════════════════════ -->
+<div class="app" id="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-logo">
+      <span>🌿</span>
+      <span>สมุนไพรไทย Admin</span>
+    </div>
+    <div class="topbar-user">
+      <div class="user-avatar" id="userAvatar">?</div>
+      <span class="user-name" id="userName">—</span>
+      <button class="btn-logout" onclick="signOut()">ออกจากระบบ</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">หน้าหลัก</div>
+        <div class="nav-item active" onclick="showPage('dashboard',this)">
+          <span class="icon">📊</span> ภาพรวม
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">จัดการข้อมูล</div>
+        <div class="nav-item" onclick="showPage('herbs',this)">
+          <span class="icon">🌿</span> สมุนไพร
+          <span class="nav-badge" id="herbBadge">—</span>
+        </div>
+        <div class="nav-item" onclick="showPage('tastes',this)">
+          <span class="icon">👅</span> รสยา 9 รส
+        </div>
+        <div class="nav-item" onclick="showPage('pikad',this)">
+          <span class="icon">⚗️</span> พิกัดยา
+          <span class="nav-badge" id="pikadBadge">—</span>
+        </div>
+        <div class="nav-item" onclick="showPage('refs',this)">
+          <span class="icon">📚</span> แหล่งอ้างอิง
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">ตั้งค่า</div>
+        <div class="nav-item" onclick="showPage('settings',this)">
+          <span class="icon">⚙️</span> ตั้งค่าระบบ
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-header">
+          <div>
+            <div class="page-title">ภาพรวม</div>
+            <div class="page-subtitle">สถิติและข้อมูลล่าสุด</div>
+          </div>
+          <a href="thai-herbs.html" target="_blank" class="btn btn-secondary">🌐 ดูเว็บหลัก</a>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-card-icon">🌿</div><div class="stat-card-num" id="dash-herbs">—</div><div class="stat-card-label">สมุนไพร</div></div>
+          <div class="stat-card"><div class="stat-card-icon">👅</div><div class="stat-card-num" id="dash-tastes">—</div><div class="stat-card-label">รสยา</div></div>
+          <div class="stat-card"><div class="stat-card-icon">⚗️</div><div class="stat-card-num" id="dash-pikad">—</div><div class="stat-card-label">พิกัดยา</div></div>
+          <div class="stat-card"><div class="stat-card-icon">📚</div><div class="stat-card-num" id="dash-refs">—</div><div class="stat-card-label">แหล่งอ้างอิง</div></div>
+        </div>
+        <div class="table-card" style="padding:1.5rem">
+          <h3 style="font-family:'Playfair Display',serif;color:var(--green-deep);margin-bottom:1rem">สมุนไพรล่าสุด</h3>
+          <div id="recentHerbs">กำลังโหลด...</div>
+        </div>
+      </div>
+
+      <!-- HERBS -->
+      <div class="page" id="page-herbs">
+        <div class="page-header">
+          <div>
+            <div class="page-title">คลังสมุนไพร</div>
+            <div class="page-subtitle" id="herbPageSub">—</div>
+          </div>
+          <button class="btn btn-primary" onclick="openHerbDrawer()">＋ เพิ่มสมุนไพร</button>
+        </div>
+        <div class="table-card">
+          <div class="table-toolbar">
+            <div class="search-box"><input type="text" id="herbSearch" placeholder="ค้นหาสมุนไพร..." oninput="filterHerbs()"></div>
+            <select class="form-select" style="width:auto;padding:.5rem .8rem" id="herbCatFilter" onchange="filterHerbs()">
+              <option value="">ทุกหมวด</option>
+            </select>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>สมุนไพร</th>
+                  <th>หมวดหมู่</th>
+                  <th>รสยา</th>
+                  <th>ฤทธิ์</th>
+                  <th>จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="herbTableBody"><tr class="loading-row"><td colspan="5">⏳ กำลังโหลด...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TASTES -->
+      <div class="page" id="page-tastes">
+        <div class="page-header">
+          <div><div class="page-title">รสยา ๙ รส</div><div class="page-subtitle">หลักการแพทย์แผนไทย</div></div>
+          <button class="btn btn-primary" onclick="openTasteDrawer()">＋ เพิ่มรสยา</button>
+        </div>
+        <div class="table-card">
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead><tr><th>#</th><th>รส</th><th>สรรพคุณเบื้องต้น</th><th>ตัวอย่างสมุนไพร</th><th>จัดการ</th></tr></thead>
+              <tbody id="tasteTableBody"><tr class="loading-row"><td colspan="5">⏳ กำลังโหลด...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PIKAD -->
+      <div class="page" id="page-pikad">
+        <div class="page-header">
+          <div><div class="page-title">พิกัดยาไทย</div><div class="page-subtitle" id="pikadPageSub">—</div></div>
+          <button class="btn btn-primary" onclick="openPikadDrawer()">＋ เพิ่มพิกัดยา</button>
+        </div>
+        <div class="table-card">
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead><tr><th>พิกัด</th><th>จำนวนตัวยา</th><th>ตัวยา</th><th>สรรพคุณ</th><th>จัดการ</th></tr></thead>
+              <tbody id="pikadTableBody"><tr class="loading-row"><td colspan="5">⏳ กำลังโหลด...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- REFS -->
+      <div class="page" id="page-refs">
+        <div class="page-header">
+          <div><div class="page-title">แหล่งอ้างอิง</div></div>
+          <button class="btn btn-primary" onclick="openRefDrawer()">＋ เพิ่มอ้างอิง</button>
+        </div>
+        <div class="table-card">
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead><tr><th>#</th><th>ชื่อตำรา/งานวิจัย</th><th>สถาบัน</th><th>ปี</th><th>ประเภท</th><th>จัดการ</th></tr></thead>
+              <tbody id="refTableBody"><tr class="loading-row"><td colspan="6">⏳ กำลังโหลด...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="page" id="page-settings">
+        <div class="page-header"><div><div class="page-title">ตั้งค่าระบบ</div></div></div>
+        <div class="table-card" style="padding:2rem;max-width:600px">
+          <h3 style="font-family:'Playfair Display',serif;color:var(--green-deep);margin-bottom:1.5rem">⚙️ Google Sheets Configuration</h3>
+          <div style="display:flex;flex-direction:column;gap:1.2rem">
+            <div class="form-group">
+              <label class="form-label">Spreadsheet ID</label>
+              <input class="form-input" id="settingSpreadsheetId" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms">
+              <span class="form-hint">ดูได้จาก URL ของ Google Sheet: docs.google.com/spreadsheets/d/<strong>[ID นี้]</strong>/edit</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Google OAuth Client ID</label>
+              <input class="form-input" id="settingClientId" placeholder="xxxxxxxxxxxx-xxxxxxxx.apps.googleusercontent.com">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Google Drive Folder ID (สำหรับอัปโหลดรูป)</label>
+              <input class="form-input" id="settingFolderId" placeholder="1abc...xyz">
+              <span class="form-hint">สร้างโฟลเดอร์ใน Google Drive แล้วคัดลอก ID จาก URL</span>
+            </div>
+            <button class="btn btn-primary" onclick="saveSettings()">💾 บันทึกการตั้งค่า</button>
+          </div>
+          <hr style="margin:2rem 0;border:none;border-top:1px solid var(--border)">
+          <h3 style="font-family:'Playfair Display',serif;color:var(--green-deep);margin-bottom:1rem">📋 Sheet Names</h3>
+          <div style="background:#f8faf9;border-radius:10px;padding:1rem;font-size:.85rem;line-height:2;color:var(--muted)">
+            Sheet 1: <strong>สมุนไพร</strong><br>
+            Sheet 2: <strong>รสยา</strong><br>
+            Sheet 3: <strong>พิกัดยา</strong><br>
+            Sheet 4: <strong>แหล่งอ้างอิง</strong>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /content -->
+</div><!-- /app -->
+
+<!-- ═══════ HERB DRAWER ═══════ -->
+<div class="drawer-overlay" id="herbDrawerOverlay" onclick="closeHerbDrawer()"></div>
+<div class="drawer" id="herbDrawer">
+  <div class="drawer-header">
+    <div class="drawer-title" id="herbDrawerTitle">เพิ่มสมุนไพร</div>
+    <button class="drawer-close" onclick="closeHerbDrawer()">✕</button>
+  </div>
+  <div class="drawer-body">
+    <input type="hidden" id="herbEditRow">
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">ID <span class="req">*</span></label>
+        <input class="form-input" id="fHerbId" placeholder="herb_023">
+        <span class="form-hint">รูปแบบ: herb_001, herb_002 ...</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ชื่อไทย <span class="req">*</span></label>
+        <input class="form-input" id="fHerbNameTh" placeholder="เช่น ขิง">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ชื่อท้องถิ่น</label>
+        <input class="form-input" id="fHerbLocal" placeholder="เช่น ขิงแกลง, ขิงเผือก">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ชื่ออังกฤษ</label>
+        <input class="form-input" id="fHerbNameEn" placeholder="Ginger">
+      </div>
+      <div class="form-group span2">
+        <label class="form-label">ชื่อวิทยาศาสตร์</label>
+        <input class="form-input" id="fHerbSci" placeholder="Zingiber officinale">
+      </div>
+      <div class="form-group">
+        <label class="form-label">หมวดสรรพคุณ</label>
+        <input class="form-input" id="fHerbCat" placeholder="ย่อยอาหาร,ลดอักเสบ">
+        <span class="form-hint">คั่นด้วยเครื่องหมาย , (comma)</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">รสยา</label>
+        <input class="form-input" id="fHerbTaste" placeholder="เผ็ดร้อน">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ส่วนที่ใช้</label>
+        <input class="form-input" id="fHerbPart" placeholder="เหง้า,ราก">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ฤทธิ์</label>
+        <select class="form-select" id="fHerbEffect">
+          <option value="">— เลือก —</option>
+          <option value="ร้อน">ร้อน</option>
+          <option value="เย็น">เย็น</option>
+          <option value="สุขุม">สุขุม</option>
+        </select>
+      </div>
+      <div class="form-group span2">
+        <label class="form-label">ลักษณะทางพฤกษศาสตร์</label>
+        <textarea class="form-textarea" id="fHerbBotany" placeholder="อธิบายรูปร่างลักษณะ..."></textarea>
+      </div>
+      <div class="form-group span2">
+        <label class="form-label">สรรพคุณแยกตามส่วนที่ใช้</label>
+        <textarea class="form-textarea" id="fHerbBenefits" placeholder="เหง้า: แก้ท้องอืด; ราก: ขับลม"></textarea>
+        <span class="form-hint">คั่นแต่ละส่วนด้วย ; (semicolon)</span>
+      </div>
+      <div class="form-group span2">
+        <label class="form-label">วิธีใช้</label>
+        <textarea class="form-textarea" id="fHerbUsage" placeholder="วิธีการใช้..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ปริมาณที่แนะนำ</label>
+        <input class="form-input" id="fHerbDose" placeholder="5-10 กรัม/วัน">
+      </div>
+      <div class="form-group">
+        <label class="form-label">แหล่งอ้างอิง</label>
+        <input class="form-input" id="fHerbRef" placeholder="บัญชียาหลักแห่งชาติ 2566">
+      </div>
+      <div class="form-group span2">
+        <label class="form-label">ข้อควรระวัง</label>
+        <textarea class="form-textarea" id="fHerbCaution" style="min-height:70px" placeholder="ข้อควรระวัง..."></textarea>
+      </div>
+      <div class="form-group span2">
+        <label class="form-label">ข้อห้ามใช้</label>
+        <textarea class="form-textarea" id="fHerbForbid" style="min-height:70px" placeholder="ข้อห้ามใช้..."></textarea>
+      </div>
+      <div class="form-group span2">
+        <label class="form-label">สมุนไพรที่เกี่ยวข้อง</label>
+        <input class="form-input" id="fHerbRelated" placeholder="herb_002,herb_005">
+        <span class="form-hint">ใส่ ID สมุนไพรที่เกี่ยวข้อง คั่นด้วย ,</span>
+      </div>
+      <div class="form-group span2">
+        <label class="form-label">รูปภาพ</label>
+        <div class="img-upload-area" id="imgUploadArea" onclick="document.getElementById('imgFileInput').click()" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropImg(event)">
+          <div class="img-upload-icon">📷</div>
+          <div class="img-upload-text">ลากรูปมาวางที่นี่ หรือ <strong>คลิกเพื่อเลือกไฟล์</strong></div>
+          <div class="img-upload-text" style="font-size:.75rem;margin-top:.3rem">PNG, JPG, WEBP ขนาดไม่เกิน 5MB</div>
+          <img class="img-preview" id="imgPreview" alt="Preview">
+        </div>
+        <input type="file" id="imgFileInput" accept="image/*" onchange="previewImg(event)">
+        <div style="margin-top:.6rem;display:flex;align-items:center;gap:.5rem">
+          <span style="font-size:.8rem;color:var(--muted)">หรือวาง URL รูปภาพ:</span>
+        </div>
+        <input class="form-input" id="fHerbImg" placeholder="https://example.com/image.jpg" oninput="previewImgUrl(this.value)" style="margin-top:.4rem">
+      </div>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <button class="btn btn-secondary" onclick="closeHerbDrawer()">ยกเลิก</button>
+    <button class="btn btn-primary" onclick="saveHerb()">💾 บันทึก</button>
+  </div>
+</div>
+
+<!-- ═══════ TASTE DRAWER ═══════ -->
+<div class="drawer-overlay" id="tasteDrawerOverlay" onclick="closeTasteDrawer()"></div>
+<div class="drawer" id="tasteDrawer">
+  <div class="drawer-header">
+    <div class="drawer-title" id="tasteDrawerTitle">เพิ่มรสยา</div>
+    <button class="drawer-close" onclick="closeTasteDrawer()">✕</button>
+  </div>
+  <div class="drawer-body">
+    <input type="hidden" id="tasteEditRow">
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">ID</label><input class="form-input" id="fTasteId" placeholder="taste_10"></div>
+      <div class="form-group"><label class="form-label">รส <span class="req">*</span></label><input class="form-input" id="fTasteName" placeholder="เช่น ฝาด"></div>
+      <div class="form-group span2"><label class="form-label">สรรพคุณเบื้องต้น</label><textarea class="form-textarea" id="fTasteProp" placeholder="สมานแผล ห้ามเลือด..."></textarea></div>
+      <div class="form-group span2"><label class="form-label">ตัวอย่างสมุนไพร</label><input class="form-input" id="fTasteEx" placeholder="ทับทิม,ฝรั่ง,ท้อ"><span class="form-hint">คั่นด้วย ,</span></div>
+      <div class="form-group span2"><label class="form-label">สมุนไพร ID</label><input class="form-input" id="fTasteHerbId" placeholder="herb_001,herb_002"><span class="form-hint">ID สมุนไพรที่มีรสนี้ คั่นด้วย ,</span></div>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <button class="btn btn-secondary" onclick="closeTasteDrawer()">ยกเลิก</button>
+    <button class="btn btn-primary" onclick="saveTaste()">💾 บันทึก</button>
+  </div>
+</div>
+
+<!-- ═══════ PIKAD DRAWER ═══════ -->
+<div class="drawer-overlay" id="pikadDrawerOverlay" onclick="closePikadDrawer()"></div>
+<div class="drawer" id="pikadDrawer">
+  <div class="drawer-header">
+    <div class="drawer-title" id="pikadDrawerTitle">เพิ่มพิกัดยา</div>
+    <button class="drawer-close" onclick="closePikadDrawer()">✕</button>
+  </div>
+  <div class="drawer-body">
+    <input type="hidden" id="pikadEditRow">
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">ID</label><input class="form-input" id="fPikadId" placeholder="pikad_009"></div>
+      <div class="form-group"><label class="form-label">ชื่อพิกัด <span class="req">*</span></label><input class="form-input" id="fPikadName" placeholder="ตรีผลา"></div>
+      <div class="form-group"><label class="form-label">ความหมาย</label><input class="form-input" id="fPikadMeaning" placeholder="ผลไม้สามอย่าง"></div>
+      <div class="form-group"><label class="form-label">จำนวนตัวยา</label><input class="form-input" type="number" id="fPikadCount" placeholder="3" min="1"></div>
+      <div class="form-group span2"><label class="form-label">ตัวยา ID</label><input class="form-input" id="fPikadIngId" placeholder="herb_001,herb_002,herb_003"><span class="form-hint">ID สมุนไพรในพิกัด คั่นด้วย ,</span></div>
+      <div class="form-group span2"><label class="form-label">ตัวยาชื่อ</label><input class="form-input" id="fPikadIngName" placeholder="สมอไทย,สมอพิเภก,มะขามป้อม"><span class="form-hint">ชื่อตัวยา คั่นด้วย ,</span></div>
+      <div class="form-group span2"><label class="form-label">สรรพคุณรวม</label><input class="form-input" id="fPikadUses" placeholder="บำรุงร่างกาย,ล้างพิษ"><span class="form-hint">คั่นด้วย ,</span></div>
+      <div class="form-group span2"><label class="form-label">วิธีเตรียม</label><textarea class="form-textarea" id="fPikadPrep" placeholder="วิธีเตรียมและใช้ยา..."></textarea></div>
+      <div class="form-group span2"><label class="form-label">ข้อควรระวัง</label><textarea class="form-textarea" id="fPikadCaution" style="min-height:70px" placeholder="ข้อควรระวัง..."></textarea></div>
+      <div class="form-group"><label class="form-label">แหล่งอ้างอิง</label><input class="form-input" id="fPikadRef" placeholder="ตำราโอสถพระนารายณ์"></div>
+      <div class="form-group"><label class="form-label">รูปภาพ URL</label><input class="form-input" id="fPikadImg" placeholder="https://..."></div>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <button class="btn btn-secondary" onclick="closePikadDrawer()">ยกเลิก</button>
+    <button class="btn btn-primary" onclick="savePikad()">💾 บันทึก</button>
+  </div>
+</div>
+
+<!-- ═══════ REF DRAWER ═══════ -->
+<div class="drawer-overlay" id="refDrawerOverlay" onclick="closeRefDrawer()"></div>
+<div class="drawer" id="refDrawer">
+  <div class="drawer-header">
+    <div class="drawer-title" id="refDrawerTitle">เพิ่มแหล่งอ้างอิง</div>
+    <button class="drawer-close" onclick="closeRefDrawer()">✕</button>
+  </div>
+  <div class="drawer-body">
+    <input type="hidden" id="refEditRow">
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">ID</label><input class="form-input" id="fRefId" placeholder="ref_011"></div>
+      <div class="form-group"><label class="form-label">ประเภท</label><select class="form-select" id="fRefType"><option>ตำรายา</option><option>งานวิจัย</option><option>ฐานข้อมูล</option><option>ตำรายาโบราณ</option><option>รางวัล</option></select></div>
+      <div class="form-group span2"><label class="form-label">ชื่อตำรา/งานวิจัย <span class="req">*</span></label><input class="form-input" id="fRefTitle" placeholder="บัญชียาหลักแห่งชาติ"></div>
+      <div class="form-group"><label class="form-label">สถาบัน</label><input class="form-input" id="fRefInst" placeholder="กระทรวงสาธารณสุข"></div>
+      <div class="form-group"><label class="form-label">ปีพิมพ์</label><input class="form-input" id="fRefYear" placeholder="2566"></div>
+      <div class="form-group span2"><label class="form-label">URL</label><input class="form-input" id="fRefUrl" placeholder="https://..."></div>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <button class="btn btn-secondary" onclick="closeRefDrawer()">ยกเลิก</button>
+    <button class="btn btn-primary" onclick="saveRef()">💾 บันทึก</button>
+  </div>
+</div>
+
+<!-- CONFIRM -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-icon">🗑️</div>
+    <div class="confirm-title">ยืนยันการลบ</div>
+    <div class="confirm-text" id="confirmText">คุณต้องการลบรายการนี้ใช่หรือไม่?</div>
+    <div class="confirm-btns">
+      <button class="btn btn-secondary" onclick="closeConfirm()">ยกเลิก</button>
+      <button class="btn btn-danger" id="confirmOkBtn">ลบ</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// CONFIG — แทนที่ด้วยค่าจริงของคุณ
+// ═══════════════════════════════════════════════
+const CONFIG = {
+  CLIENT_ID: 'YOUR_CLIENT_ID.apps.googleusercontent.com',
+  SPREADSHEET_ID: 'YOUR_SPREADSHEET_ID',
+  DRIVE_FOLDER_ID: 'YOUR_DRIVE_FOLDER_ID',
+  SCOPES: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file',
+  SHEET_NAMES: { herbs:'สมุนไพร', tastes:'รสยา', pikad:'พิกัดยา', refs:'แหล่งอ้างอิง' },
+  ALLOWED_EMAILS: ['phukadungclinicthai@gmail.com','rawiwan815@gmail.com']
+};
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let state = {
+  user: null, tokenClient: null, accessToken: null,
+  herbs:[], tastes:[], pikad:[], refs:[],
+  demo: false
+};
+let herbsFiltered = [];
+let pendingDelete = null;
+
+// Load saved settings
+function loadSettings(){
+  const saved = localStorage.getItem('herb_admin_config');
+  if(saved){
+    const cfg = JSON.parse(saved);
+    if(cfg.CLIENT_ID) CONFIG.CLIENT_ID = cfg.CLIENT_ID;
+    if(cfg.SPREADSHEET_ID) CONFIG.SPREADSHEET_ID = cfg.SPREADSHEET_ID;
+    if(cfg.DRIVE_FOLDER_ID) CONFIG.DRIVE_FOLDER_ID = cfg.DRIVE_FOLDER_ID;
+  }
+}
+function saveSettings(){
+  const cfg = {
+    CLIENT_ID: document.getElementById('settingClientId').value,
+    SPREADSHEET_ID: document.getElementById('settingSpreadsheetId').value,
+    DRIVE_FOLDER_ID: document.getElementById('settingFolderId').value
+  };
+  localStorage.setItem('herb_admin_config',JSON.stringify(cfg));
+  Object.assign(CONFIG, cfg);
+  toast('💾 บันทึกการตั้งค่าแล้ว','success');
+}
+
+// ═══════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════
+function signInWithGoogle(){
+  if(CONFIG.CLIENT_ID === 'YOUR_CLIENT_ID.apps.googleusercontent.com'){
+    toast('⚙️ กรุณาตั้งค่า Client ID ก่อนในหน้า ตั้งค่าระบบ','error'); return;
+  }
+  if(!window.google){ toast('กำลังโหลด Google API...','info'); initGoogleAuth(); return; }
+  state.tokenClient.requestAccessToken();
+}
+
+function initGoogleAuth(){
+  google.accounts.id.initialize({ client_id: CONFIG.CLIENT_ID, callback: handleCredential });
+  state.tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CONFIG.CLIENT_ID,
+    scope: CONFIG.SCOPES,
+    callback: async(resp) => {
+      if(resp.error){ toast('เข้าสู่ระบบไม่สำเร็จ: '+resp.error,'error'); return; }
+      state.accessToken = resp.access_token;
+      await fetchUserInfo();
+    }
+  });
+}
+
+async function fetchUserInfo(){
+  try{
+    const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo',
+      { headers:{ Authorization:'Bearer '+state.accessToken }});
+    const info = await res.json();
+    if(!CONFIG.ALLOWED_EMAILS.includes(info.email)){
+      toast('❌ อีเมลนี้ไม่มีสิทธิ์เข้าใช้งาน','error'); return;
+    }
+    state.user = info;
+    enterApp();
+  }catch(e){ toast('เกิดข้อผิดพลาด: '+e.message,'error'); }
+}
+
+function demoLogin(){
+  state.demo = true;
+  state.user = { name:'Demo User', email:'demo@example.com', picture:'' };
+  enterApp();
+  loadDemoData();
+}
+
+function enterApp(){
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  const av = document.getElementById('userAvatar');
+  if(state.user.picture) av.innerHTML = `<img src="${state.user.picture}" style="width:100%;height:100%;object-fit:cover">`;
+  else av.textContent = (state.user.name||'?')[0];
+  document.getElementById('userName').textContent = state.user.name || state.user.email;
+  if(!state.demo) loadAllData();
+}
+
+function signOut(){
+  state.user = null; state.accessToken = null; state.demo = false;
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('app').classList.remove('visible');
+  toast('ออกจากระบบแล้ว','info');
+}
+
+// ═══════════════════════════════════════════════
+// SHEETS API
+// ═══════════════════════════════════════════════
+async function sheetsGet(range){
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(range)}`;
+  const res = await fetch(url, { headers:{ Authorization:'Bearer '+state.accessToken }});
+  if(!res.ok) throw new Error('Sheets API error: '+(await res.text()));
+  return await res.json();
+}
+
+async function sheetsAppend(sheetName, values){
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(sheetName+'!A1')}:append?valueInputOption=USER_ENTERED`;
+  const res = await fetch(url, {
+    method:'POST', headers:{ Authorization:'Bearer '+state.accessToken, 'Content-Type':'application/json' },
+    body: JSON.stringify({ values })
+  });
+  if(!res.ok) throw new Error('Append error: '+(await res.text()));
+  return await res.json();
+}
+
+async function sheetsUpdate(range, values){
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
+  const res = await fetch(url, {
+    method:'PUT', headers:{ Authorization:'Bearer '+state.accessToken, 'Content-Type':'application/json' },
+    body: JSON.stringify({ values })
+  });
+  if(!res.ok) throw new Error('Update error: '+(await res.text()));
+  return await res.json();
+}
+
+async function sheetsClear(range){
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${encodeURIComponent(range)}:clear`;
+  const res = await fetch(url, { method:'POST', headers:{ Authorization:'Bearer '+state.accessToken }});
+  if(!res.ok) throw new Error('Clear error');
+}
+
+// ═══════════════════════════════════════════════
+// LOAD DATA
+// ═══════════════════════════════════════════════
+async function loadAllData(){
+  setProgress(20);
+  await Promise.all([loadHerbsData(), loadTastesData(), loadPikadData(), loadRefsData()]);
+  setProgress(100);
+  updateDashboard();
+}
+
+async function loadHerbsData(){
+  try{
+    const d = await sheetsGet(CONFIG.SHEET_NAMES.herbs+'!A:R');
+    state.herbs = parseSheet(d.values||[]);
+    herbsFiltered = [...state.herbs];
+    renderHerbTable();
+    updateBadge('herbBadge', state.herbs.length);
+    document.getElementById('herbPageSub').textContent = `ทั้งหมด ${state.herbs.length} รายการ`;
+  }catch(e){ toast('โหลดสมุนไพรไม่สำเร็จ: '+e.message,'error'); }
+}
+async function loadTastesData(){
+  try{
+    const d = await sheetsGet(CONFIG.SHEET_NAMES.tastes+'!A:E');
+    state.tastes = parseSheet(d.values||[]);
+    renderTasteTable();
+  }catch(e){ toast('โหลดรสยาไม่สำเร็จ','error'); }
+}
+async function loadPikadData(){
+  try{
+    const d = await sheetsGet(CONFIG.SHEET_NAMES.pikad+'!A:K');
+    state.pikad = parseSheet(d.values||[]);
+    renderPikadTable();
+    updateBadge('pikadBadge', state.pikad.length);
+    document.getElementById('pikadPageSub').textContent = `ทั้งหมด ${state.pikad.length} พิกัด`;
+  }catch(e){ toast('โหลดพิกัดยาไม่สำเร็จ','error'); }
+}
+async function loadRefsData(){
+  try{
+    const d = await sheetsGet(CONFIG.SHEET_NAMES.refs+'!A:F');
+    state.refs = parseSheet(d.values||[]);
+    renderRefTable();
+  }catch(e){ toast('โหลดแหล่งอ้างอิงไม่สำเร็จ','error'); }
+}
+
+function parseSheet(rows){
+  if(rows.length<2) return [];
+  const headers = rows[0];
+  return rows.slice(1).map((r,i)=>{
+    const obj={_row:i+2};
+    headers.forEach((h,j)=>{ obj[h]=(r[j]||'').trim(); });
+    return obj;
+  }).filter(r=>Object.values(r).some(v=>v&&v!==r._row));
+}
+
+// ═══════════════════════════════════════════════
+// DEMO DATA
+// ═══════════════════════════════════════════════
+function loadDemoData(){
+  state.herbs = [
+    {_row:2,id:'herb_001',ชื่อไทย:'ขิง',ชื่ออังกฤษ:'Ginger',หมวดสรรพคุณ:'ย่อยอาหาร,ลดอักเสบ',รสยา:'เผ็ดร้อน',ฤทธิ์:'ร้อน',รูปภาพ_URL:'https://media.istockphoto.com/id/1407060911/photo/organic-fresh-ginger-roots.jpg?s=612x612'},
+    {_row:3,id:'herb_002',ชื่อไทย:'ฟ้าทลายโจร',ชื่ออังกฤษ:'Green Chiretta',หมวดสรรพคุณ:'ภูมิคุ้มกัน,ลดอักเสบ',รสยา:'ขม',ฤทธิ์:'เย็น',รูปภาพ_URL:''},
+    {_row:4,id:'herb_003',ชื่อไทย:'บัวบก',ชื่ออังกฤษ:'Gotu Kola',หมวดสรรพคุณ:'ผิวพรรณ',รสยา:'จืด',ฤทธิ์:'เย็น',รูปภาพ_URL:''},
+    {_row:5,id:'herb_004',ชื่อไทย:'ว่านหางจระเข้',ชื่ออังกฤษ:'Aloe Vera',หมวดสรรพคุณ:'ผิวพรรณ,ย่อยอาหาร',รสยา:'จืด',ฤทธิ์:'เย็น',รูปภาพ_URL:''},
+    {_row:6,id:'herb_005',ชื่อไทย:'ขมิ้นชัน',ชื่ออังกฤษ:'Turmeric',หมวดสรรพคุณ:'ลดอักเสบ,ย่อยอาหาร',รสยา:'เผ็ดร้อน',ฤทธิ์:'ร้อน',รูปภาพ_URL:''},
+  ];
+  state.tastes = [
+    {_row:2,id:'taste_01',รส:'ฝาด',สรรพคุณเบื้องต้น:'สมานแผล ห้ามเลือด',ตัวอย่างสมุนไพร:'ทับทิม,ฝรั่ง'},
+    {_row:3,id:'taste_02',รส:'หวาน',สรรพคุณเบื้องต้น:'บำรุงร่างกาย',ตัวอย่างสมุนไพร:'ชะเอมเทศ,มะพร้าว'},
+    {_row:4,id:'taste_07',รส:'ขม',สรรพคุณเบื้องต้น:'ดับพิษร้อน แก้ไข้',ตัวอย่างสมุนไพร:'บอระเพ็ด,ฟ้าทลายโจร'},
+  ];
+  state.pikad = [
+    {_row:2,id:'pikad_001',ชื่อพิกัด:'ตรีผลา',ความหมาย:'ผลไม้สามอย่าง',จำนวนตัวยา:'3','ตัวยา_ชื่อ':'สมอไทย,สมอพิเภก,มะขามป้อม',สรรพคุณรวม:'บำรุงร่างกาย,ล้างพิษ'},
+    {_row:3,id:'pikad_002',ชื่อพิกัด:'ตรีกฏุก',ความหมาย:'เครื่องเผ็ดสามอย่าง',จำนวนตัวยา:'3','ตัวยา_ชื่อ':'ขิงแห้ง,พริกไทย,ดีปลี',สรรพคุณรวม:'ย่อยอาหาร,แก้ท้องอืด'},
+  ];
+  state.refs = [
+    {_row:2,id:'ref_001',ชื่อตำรา_งานวิจัย:'บัญชียาหลักแห่งชาติ',ปีพิมพ์:'2566',สถาบัน:'กระทรวงสาธารณสุข',ประเภท:'ตำรายา'},
+  ];
+  herbsFiltered = [...state.herbs];
+  renderHerbTable(); renderTasteTable(); renderPikadTable(); renderRefTable();
+  updateDashboard();
+  buildCatFilter();
+  toast('🎯 Demo Mode — ข้อมูลจำลอง ไม่ได้บันทึกจริง','info');
+}
+
+// ═══════════════════════════════════════════════
+// RENDER TABLES
+// ═══════════════════════════════════════════════
+function renderHerbTable(){
+  const tbody = document.getElementById('herbTableBody');
+  if(!herbsFiltered.length){ tbody.innerHTML='<tr class="empty-row"><td colspan="5">🌿 ยังไม่มีข้อมูล</td></tr>'; return; }
+  tbody.innerHTML = herbsFiltered.map(h=>`
+    <tr>
+      <td>
+        <div class="herb-cell">
+          <div class="herb-thumb">
+            ${h['รูปภาพ_URL']?`<img src="${h['รูปภาพ_URL']}" onerror="this.parentElement.textContent='🌿'">`:'🌿'}
+          </div>
+          <div>
+            <div class="herb-cell-name">${h['ชื่อไทย']||'—'}</div>
+            <div class="herb-cell-en">${h['ชื่ออังกฤษ']||''}</div>
+          </div>
+        </div>
+      </td>
+      <td>${(h['หมวดสรรพคุณ']||'').split(',').map(c=>`<span class="tag-pill">${c.trim()}</span>`).join('')}</td>
+      <td>${h['รสยา']||'—'}</td>
+      <td><span class="tag-pill ${h['ฤทธิ์']==='ร้อน'?'tag-hot':h['ฤทธิ์']==='เย็น'?'tag-cool':''}">${h['ฤทธิ์']||'—'}</span></td>
+      <td>
+        <div class="actions">
+          <button class="btn btn-secondary btn-sm" onclick="editHerb(${h._row})">✏️ แก้ไข</button>
+          <button class="btn btn-danger btn-sm" onclick="confirmDelete('herb',${h._row},'${(h['ชื่อไทย']||'').replace(/'/g,"\\'")}')">🗑️</button>
+        </div>
+      </td>
+    </tr>`).join('');
+  buildCatFilter();
+}
+
+function renderTasteTable(){
+  const tbody = document.getElementById('tasteTableBody');
+  if(!state.tastes.length){ tbody.innerHTML='<tr class="empty-row"><td colspan="5">ยังไม่มีข้อมูล</td></tr>'; return; }
+  tbody.innerHTML = state.tastes.map((t,i)=>`
+    <tr>
+      <td style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--gold)">${i+1}</td>
+      <td style="font-weight:700;color:var(--green-deep)">${t['รส']||'—'}</td>
+      <td style="font-size:.85rem;color:var(--muted)">${t['สรรพคุณเบื้องต้น']||''}</td>
+      <td>${(t['ตัวอย่างสมุนไพร']||'').split(',').slice(0,3).map(s=>`<span class="tag-pill">${s.trim()}</span>`).join('')}</td>
+      <td><div class="actions">
+        <button class="btn btn-secondary btn-sm" onclick="editTaste(${t._row})">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="confirmDelete('taste',${t._row},'${(t['รส']||'').replace(/'/g,"\\'")}')">🗑️</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function renderPikadTable(){
+  const tbody = document.getElementById('pikadTableBody');
+  if(!state.pikad.length){ tbody.innerHTML='<tr class="empty-row"><td colspan="5">ยังไม่มีข้อมูล</td></tr>'; return; }
+  tbody.innerHTML = state.pikad.map(p=>`
+    <tr>
+      <td><div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--green-deep)">${p['ชื่อพิกัด']||'—'}</div>
+          <div style="font-size:.78rem;color:var(--muted)">${p['ความหมาย']||''}</div></td>
+      <td style="text-align:center;font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold)">${p['จำนวนตัวยา']||'?'}</td>
+      <td>${(p['ตัวยา_ชื่อ']||'').split(',').map(s=>`<span class="tag-pill">${s.trim()}</span>`).join('')}</td>
+      <td style="font-size:.82rem;color:var(--muted)">${(p['สรรพคุณรวม']||'').substring(0,50)}</td>
+      <td><div class="actions">
+        <button class="btn btn-secondary btn-sm" onclick="editPikad(${p._row})">✏️ แก้ไข</button>
+        <button class="btn btn-danger btn-sm" onclick="confirmDelete('pikad',${p._row},'${(p['ชื่อพิกัด']||'').replace(/'/g,"\\'")}')">🗑️</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function renderRefTable(){
+  const tbody = document.getElementById('refTableBody');
+  if(!state.refs.length){ tbody.innerHTML='<tr class="empty-row"><td colspan="6">ยังไม่มีข้อมูล</td></tr>'; return; }
+  tbody.innerHTML = state.refs.map((r,i)=>`
+    <tr>
+      <td style="color:var(--gold);font-family:'Playfair Display',serif">${i+1}</td>
+      <td style="font-weight:700;color:var(--green-deep)">${r['ชื่อตำรา_งานวิจัย']||'—'}</td>
+      <td style="font-size:.83rem">${r['สถาบัน']||'—'}</td>
+      <td>${r['ปีพิมพ์']||'—'}</td>
+      <td><span class="tag-pill">${r['ประเภท']||'—'}</span></td>
+      <td><div class="actions">
+        <button class="btn btn-secondary btn-sm" onclick="editRef(${r._row})">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="confirmDelete('ref',${r._row},'${(r['ชื่อตำรา_งานวิจัย']||'').replace(/'/g,"\\'")}')">🗑️</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+// FILTER
+// ═══════════════════════════════════════════════
+function filterHerbs(){
+  const q = document.getElementById('herbSearch').value.trim().toLowerCase();
+  const cat = document.getElementById('herbCatFilter').value;
+  herbsFiltered = state.herbs.filter(h=>{
+    const matchQ = !q || (h['ชื่อไทย']||'').includes(q) || (h['ชื่ออังกฤษ']||'').toLowerCase().includes(q);
+    const matchCat = !cat || (h['หมวดสรรพคุณ']||'').includes(cat);
+    return matchQ && matchCat;
+  });
+  renderHerbTable();
+}
+function buildCatFilter(){
+  const cats = new Set();
+  state.herbs.forEach(h=>(h['หมวดสรรพคุณ']||'').split(',').forEach(c=>cats.add(c.trim())));
+  const sel = document.getElementById('herbCatFilter');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">ทุกหมวด</option>' + [...cats].map(c=>`<option value="${c}">${c}</option>`).join('');
+  sel.value = cur;
+}
+
+// ═══════════════════════════════════════════════
+// HERB CRUD
+// ═══════════════════════════════════════════════
+function openHerbDrawer(data=null){
+  document.getElementById('herbDrawerTitle').textContent = data ? '✏️ แก้ไขสมุนไพร' : '＋ เพิ่มสมุนไพร';
+  document.getElementById('herbEditRow').value = data ? data._row : '';
+  const fields = ['Id','NameTh','Local','NameEn','Sci','Cat','Taste','Part','Effect','Botany','Benefits','Usage','Dose','Ref','Caution','Forbid','Related','Img'];
+  const keys = ['id','ชื่อไทย','ชื่อท้องถิ่น','ชื่ออังกฤษ','ชื่อวิทยาศาสตร์','หมวดสรรพคุณ','รสยา','ส่วนที่ใช้','ฤทธิ์','ลักษณะทางพฤกษศาสตร์','สรรพคุณแยกตามส่วน','วิธีใช้','ปริมาณที่แนะนำ','แหล่งอ้างอิง','ข้อควรระวัง','ข้อห้ามใช้','สมุนไพรที่เกี่ยวข้อง','รูปภาพ_URL'];
+  fields.forEach((f,i)=>{
+    const el = document.getElementById('fHerb'+f);
+    if(el) el.value = data ? (data[keys[i]]||'') : '';
+  });
+  document.getElementById('fHerbEffect').value = data ? (data['ฤทธิ์']||'') : '';
+  const prev = document.getElementById('imgPreview');
+  if(data && data['รูปภาพ_URL']){ prev.src=data['รูปภาพ_URL']; prev.classList.add('show'); }
+  else prev.classList.remove('show');
+  if(!data) document.getElementById('fHerbId').value = 'herb_'+ String(state.herbs.length+1).padStart(3,'0');
+  openDrawer('herb');
+}
+function editHerb(row){ const h=state.herbs.find(x=>x._row===row); if(h) openHerbDrawer(h); }
+function closeHerbDrawer(){ closeDrawer('herb'); }
+
+async function saveHerb(){
+  const row = document.getElementById('herbEditRow').value;
+  const vals = [
+    document.getElementById('fHerbId').value,
+    document.getElementById('fHerbNameTh').value,
+    document.getElementById('fHerbLocal').value,
+    document.getElementById('fHerbNameEn').value,
+    document.getElementById('fHerbSci').value,
+    document.getElementById('fHerbCat').value,
+    document.getElementById('fHerbTaste').value,
+    document.getElementById('fHerbPart').value,
+    document.getElementById('fHerbEffect').value,
+    document.getElementById('fHerbBotany').value,
+    document.getElementById('fHerbBenefits').value,
+    document.getElementById('fHerbUsage').value,
+    document.getElementById('fHerbDose').value,
+    document.getElementById('fHerbCaution').value,
+    document.getElementById('fHerbForbid').value,
+    document.getElementById('fHerbRef').value,
+    document.getElementById('fHerbImg').value,
+    document.getElementById('fHerbRelated').value
+  ];
+  if(!vals[1]){ toast('กรุณาใส่ชื่อไทย','error'); return; }
+  try{
+    if(state.demo){
+      if(row){ const i=state.herbs.findIndex(x=>x._row==row); if(i>=0){ const keys=['id','ชื่อไทย','ชื่อท้องถิ่น','ชื่ออังกฤษ','ชื่อวิทยาศาสตร์','หมวดสรรพคุณ','รสยา','ส่วนที่ใช้','ฤทธิ์','ลักษณะทางพฤกษศาสตร์','สรรพคุณแยกตามส่วน','วิธีใช้','ปริมาณที่แนะนำ','ข้อควรระวัง','ข้อห้ามใช้','แหล่งอ้างอิง','รูปภาพ_URL','สมุนไพรที่เกี่ยวข้อง']; keys.forEach((k,j)=>state.herbs[i][k]=vals[j]); }}
+      else { const newH={_row:state.herbs.length+2}; ['id','ชื่อไทย','ชื่อท้องถิ่น','ชื่ออังกฤษ','ชื่อวิทยาศาสตร์','หมวดสรรพคุณ','รสยา','ส่วนที่ใช้','ฤทธิ์','ลักษณะทางพฤกษศาสตร์','สรรพคุณแยกตามส่วน','วิธีใช้','ปริมาณที่แนะนำ','ข้อควรระวัง','ข้อห้ามใช้','แหล่งอ้างอิง','รูปภาพ_URL','สมุนไพรที่เกี่ยวข้อง'].forEach((k,j)=>newH[k]=vals[j]); state.herbs.push(newH); }
+      herbsFiltered=[...state.herbs]; renderHerbTable(); updateDashboard();
+      toast('✅ บันทึกแล้ว (Demo Mode)','success'); closeHerbDrawer(); return;
+    }
+    if(row){ await sheetsUpdate(`${CONFIG.SHEET_NAMES.herbs}!A${row}:R${row}`,[vals]); }
+    else { await sheetsAppend(CONFIG.SHEET_NAMES.herbs,[vals]); }
+    await loadHerbsData();
+    updateDashboard();
+    toast('✅ บันทึกสมุนไพรแล้ว','success');
+    closeHerbDrawer();
+  }catch(e){ toast('เกิดข้อผิดพลาด: '+e.message,'error'); }
+}
+
+// ═══════════════════════════════════════════════
+// TASTE CRUD
+// ═══════════════════════════════════════════════
+function openTasteDrawer(data=null){
+  document.getElementById('tasteDrawerTitle').textContent = data ? '✏️ แก้ไขรสยา' : '＋ เพิ่มรสยา';
+  document.getElementById('tasteEditRow').value = data ? data._row : '';
+  document.getElementById('fTasteId').value = data ? (data['id']||'') : 'taste_'+(state.tastes.length+1).toString().padStart(2,'0');
+  document.getElementById('fTasteName').value = data ? (data['รส']||'') : '';
+  document.getElementById('fTasteProp').value = data ? (data['สรรพคุณเบื้องต้น']||'') : '';
+  document.getElementById('fTasteEx').value = data ? (data['ตัวอย่างสมุนไพร']||'') : '';
+  document.getElementById('fTasteHerbId').value = data ? (data['สมุนไพร_id']||'') : '';
+  openDrawer('taste');
+}
+function editTaste(row){ const t=state.tastes.find(x=>x._row===row); if(t) openTasteDrawer(t); }
+function closeTasteDrawer(){ closeDrawer('taste'); }
+async function saveTaste(){
+  const row = document.getElementById('tasteEditRow').value;
+  const vals=[document.getElementById('fTasteId').value,document.getElementById('fTasteName').value,document.getElementById('fTasteProp').value,document.getElementById('fTasteEx').value,document.getElementById('fTasteHerbId').value];
+  if(!vals[1]){ toast('กรุณาใส่ชื่อรส','error'); return; }
+  try{
+    if(state.demo){ toast('✅ บันทึกแล้ว (Demo Mode)','success'); closeTasteDrawer(); return; }
+    if(row) await sheetsUpdate(`${CONFIG.SHEET_NAMES.tastes}!A${row}:E${row}`,[vals]);
+    else await sheetsAppend(CONFIG.SHEET_NAMES.tastes,[vals]);
+    await loadTastesData();
+    toast('✅ บันทึกรสยาแล้ว','success'); closeTasteDrawer();
+  }catch(e){ toast('เกิดข้อผิดพลาด: '+e.message,'error'); }
+}
+
+// ═══════════════════════════════════════════════
+// PIKAD CRUD
+// ═══════════════════════════════════════════════
+function openPikadDrawer(data=null){
+  document.getElementById('pikadDrawerTitle').textContent = data ? '✏️ แก้ไขพิกัดยา' : '＋ เพิ่มพิกัดยา';
+  document.getElementById('pikadEditRow').value = data ? data._row : '';
+  ['Id','Name','Meaning','Count','IngId','IngName','Uses','Prep','Caution','Ref','Img'].forEach((f,i)=>{
+    const keys=['id','ชื่อพิกัด','ความหมาย','จำนวนตัวยา','ตัวยา_id','ตัวยา_ชื่อ','สรรพคุณรวม','วิธีเตรียม','ข้อควรระวัง','แหล่งอ้างอิง','รูปภาพ_URL'];
+    const el=document.getElementById('fPikad'+f);
+    if(el) el.value = data ? (data[keys[i]]||'') : '';
+  });
+  if(!data) document.getElementById('fPikadId').value='pikad_'+(state.pikad.length+1).toString().padStart(3,'0');
+  openDrawer('pikad');
+}
+function editPikad(row){ const p=state.pikad.find(x=>x._row===row); if(p) openPikadDrawer(p); }
+function closePikadDrawer(){ closeDrawer('pikad'); }
+async function savePikad(){
+  const row=document.getElementById('pikadEditRow').value;
+  const vals=['Id','Name','Meaning','Count','IngId','IngName','Uses','Prep','Caution','Ref','Img'].map(f=>document.getElementById('fPikad'+f).value);
+  if(!vals[1]){ toast('กรุณาใส่ชื่อพิกัด','error'); return; }
+  try{
+    if(state.demo){ toast('✅ บันทึกแล้ว (Demo Mode)','success'); closePikadDrawer(); return; }
+    if(row) await sheetsUpdate(`${CONFIG.SHEET_NAMES.pikad}!A${row}:K${row}`,[vals]);
+    else await sheetsAppend(CONFIG.SHEET_NAMES.pikad,[vals]);
+    await loadPikadData(); toast('✅ บันทึกพิกัดยาแล้ว','success'); closePikadDrawer();
+  }catch(e){ toast('เกิดข้อผิดพลาด: '+e.message,'error'); }
+}
+
+// ═══════════════════════════════════════════════
+// REF CRUD
+// ═══════════════════════════════════════════════
+function openRefDrawer(data=null){
+  document.getElementById('refDrawerTitle').textContent = data ? '✏️ แก้ไขอ้างอิง' : '＋ เพิ่มแหล่งอ้างอิง';
+  document.getElementById('refEditRow').value = data ? data._row : '';
+  document.getElementById('fRefId').value = data ? (data['id']||'') : 'ref_'+(state.refs.length+1).toString().padStart(3,'0');
+  document.getElementById('fRefTitle').value = data ? (data['ชื่อตำรา_งานวิจัย']||'') : '';
+  document.getElementById('fRefInst').value = data ? (data['สถาบัน']||'') : '';
+  document.getElementById('fRefYear').value = data ? (data['ปีพิมพ์']||'') : '';
+  document.getElementById('fRefType').value = data ? (data['ประเภท']||'ตำรายา') : 'ตำรายา';
+  document.getElementById('fRefUrl').value = data ? (data['URL']||'') : '';
+  openDrawer('ref');
+}
+function editRef(row){ const r=state.refs.find(x=>x._row===row); if(r) openRefDrawer(r); }
+function closeRefDrawer(){ closeDrawer('ref'); }
+async function saveRef(){
+  const row=document.getElementById('refEditRow').value;
+  const vals=[document.getElementById('fRefId').value,document.getElementById('fRefTitle').value,document.getElementById('fRefYear').value,document.getElementById('fRefInst').value,document.getElementById('fRefType').value,document.getElementById('fRefUrl').value];
+  if(!vals[1]){ toast('กรุณาใส่ชื่อตำรา','error'); return; }
+  try{
+    if(state.demo){ toast('✅ บันทึกแล้ว (Demo Mode)','success'); closeRefDrawer(); return; }
+    if(row) await sheetsUpdate(`${CONFIG.SHEET_NAMES.refs}!A${row}:F${row}`,[vals]);
+    else await sheetsAppend(CONFIG.SHEET_NAMES.refs,[vals]);
+    await loadRefsData(); toast('✅ บันทึกแล้ว','success'); closeRefDrawer();
+  }catch(e){ toast('เกิดข้อผิดพลาด: '+e.message,'error'); }
+}
+
+// ═══════════════════════════════════════════════
+// DELETE
+// ═══════════════════════════════════════════════
+function confirmDelete(type, row, name){
+  pendingDelete = {type, row};
+  document.getElementById('confirmText').textContent = `ลบ "${name}" ออกจากระบบ? ไม่สามารถกู้คืนได้`;
+  document.getElementById('confirmOkBtn').onclick = executeDelete;
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+function closeConfirm(){ document.getElementById('confirmOverlay').classList.remove('open'); pendingDelete=null; }
+async function executeDelete(){
+  closeConfirm();
+  if(!pendingDelete) return;
+  const {type,row} = pendingDelete;
+  if(state.demo){
+    if(type==='herb'){ state.herbs=state.herbs.filter(x=>x._row!==row); herbsFiltered=[...state.herbs]; renderHerbTable(); }
+    else if(type==='taste') state.tastes=state.tastes.filter(x=>x._row!==row), renderTasteTable();
+    else if(type==='pikad') state.pikad=state.pikad.filter(x=>x._row!==row), renderPikadTable();
+    else if(type==='ref') state.refs=state.refs.filter(x=>x._row!==row), renderRefTable();
+    updateDashboard(); toast('🗑️ ลบแล้ว (Demo Mode)','success'); return;
+  }
+  try{
+    const sheetMap={herb:CONFIG.SHEET_NAMES.herbs,taste:CONFIG.SHEET_NAMES.tastes,pikad:CONFIG.SHEET_NAMES.pikad,ref:CONFIG.SHEET_NAMES.refs};
+    const colMap={herb:'R',taste:'E',pikad:'K',ref:'F'};
+    await sheetsClear(`${sheetMap[type]}!A${row}:${colMap[type]}${row}`);
+    toast('🗑️ ลบข้อมูลแล้ว','success');
+    if(type==='herb') await loadHerbsData();
+    else if(type==='taste') await loadTastesData();
+    else if(type==='pikad') await loadPikadData();
+    else await loadRefsData();
+    updateDashboard();
+  }catch(e){ toast('เกิดข้อผิดพลาด: '+e.message,'error'); }
+}
+
+// ═══════════════════════════════════════════════
+// IMAGE
+// ═══════════════════════════════════════════════
+function previewImg(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const prev = document.getElementById('imgPreview');
+    prev.src = ev.target.result; prev.classList.add('show');
+    uploadImageToDrive(file);
+  };
+  reader.readAsDataURL(file);
+}
+function previewImgUrl(url){
+  const prev = document.getElementById('imgPreview');
+  if(url){ prev.src=url; prev.classList.add('show'); } else prev.classList.remove('show');
+}
+function dragOver(e){ e.preventDefault(); document.getElementById('imgUploadArea').classList.add('dragover'); }
+function dragLeave(e){ document.getElementById('imgUploadArea').classList.remove('dragover'); }
+function dropImg(e){
+  e.preventDefault(); dragLeave(e);
+  const file = e.dataTransfer.files[0];
+  if(file && file.type.startsWith('image/')){ const dt=new DataTransfer(); dt.items.add(file); document.getElementById('imgFileInput').files=dt.files; previewImg({target:{files:[file]}}); }
+}
+async function uploadImageToDrive(file){
+  if(state.demo){ toast('📷 Demo: ไม่ได้อัปโหลดจริง','info'); return; }
+  if(!CONFIG.DRIVE_FOLDER_ID || CONFIG.DRIVE_FOLDER_ID==='YOUR_DRIVE_FOLDER_ID'){ toast('⚙️ กรุณาตั้งค่า Drive Folder ID ก่อน','error'); return; }
+  toast('⬆️ กำลังอัปโหลดรูปภาพ...','info');
+  try{
+    const meta = JSON.stringify({name:file.name, parents:[CONFIG.DRIVE_FOLDER_ID]});
+    const form = new FormData();
+    form.append('metadata', new Blob([meta],{type:'application/json'}));
+    form.append('file', file);
+    const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webContentLink',
+      {method:'POST', headers:{Authorization:'Bearer '+state.accessToken}, body:form});
+    const data = await res.json();
+    const publicUrl = `https://drive.google.com/uc?export=view&id=${data.id}`;
+    document.getElementById('fHerbImg').value = publicUrl;
+    toast('✅ อัปโหลดรูปภาพสำเร็จ','success');
+  }catch(e){ toast('อัปโหลดรูปไม่สำเร็จ: '+e.message,'error'); }
+}
+
+// ═══════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════
+function updateDashboard(){
+  document.getElementById('dash-herbs').textContent = state.herbs.length;
+  document.getElementById('dash-tastes').textContent = state.tastes.length;
+  document.getElementById('dash-pikad').textContent = state.pikad.length;
+  document.getElementById('dash-refs').textContent = state.refs.length;
+  const recent = state.herbs.slice(-5).reverse();
+  document.getElementById('recentHerbs').innerHTML = recent.length
+    ? recent.map(h=>`<div style="display:flex;align-items:center;gap:.75rem;padding:.6rem 0;border-bottom:1px solid #f0f4f1">
+        <div class="herb-thumb">${h['รูปภาพ_URL']?`<img src="${h['รูปภาพ_URL']}" onerror="this.parentElement.textContent='🌿'">`:'🌿'}</div>
+        <div><div style="font-weight:700;color:var(--green-deep)">${h['ชื่อไทย']||'—'}</div>
+             <div style="font-size:.78rem;color:var(--muted)">${h['ชื่ออังกฤษ']||''}</div></div>
+        <div style="margin-left:auto"><button class="btn btn-secondary btn-sm" onclick="editHerb(${h._row});showPage('herbs',null)">✏️</button></div>
+      </div>`).join('')
+    : '<div style="color:var(--muted);font-size:.9rem">ยังไม่มีข้อมูล</div>';
+}
+
+// ═══════════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════════
+function showPage(name, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  else document.querySelectorAll('.nav-item').forEach(n=>{ if(n.textContent.includes(name)) n.classList.add('active'); });
+}
+function openDrawer(type){
+  document.getElementById(type+'DrawerOverlay').classList.add('open');
+  setTimeout(()=>document.getElementById(type+'Drawer').classList.add('open'),10);
+  document.body.style.overflow='hidden';
+}
+function closeDrawer(type){
+  document.getElementById(type+'Drawer').classList.remove('open');
+  document.getElementById(type+'DrawerOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+function updateBadge(id, n){ document.getElementById(id).textContent = n; }
+function setProgress(pct){
+  const bar = document.getElementById('progressBar');
+  bar.style.width = pct+'%';
+  if(pct>=100) setTimeout(()=>bar.style.width='0',600);
+}
+function toast(msg, type='info'){
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.innerHTML = `<span>${msg}</span>`;
+  document.getElementById('toastContainer').appendChild(el);
+  setTimeout(()=>el.remove(), 3500);
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+loadSettings();
+// Load Google Identity Services
+const script = document.createElement('script');
+script.src = 'https://accounts.google.com/gsi/client';
+script.onload = () => { if(CONFIG.CLIENT_ID !== 'YOUR_CLIENT_ID.apps.googleusercontent.com') initGoogleAuth(); };
+document.head.appendChild(script);
+
+// Pre-fill settings
+document.getElementById('settingClientId').value = CONFIG.CLIENT_ID !== 'YOUR_CLIENT_ID.apps.googleusercontent.com' ? CONFIG.CLIENT_ID : '';
+document.getElementById('settingSpreadsheetId').value = CONFIG.SPREADSHEET_ID !== 'YOUR_SPREADSHEET_ID' ? CONFIG.SPREADSHEET_ID : '';
+document.getElementById('settingFolderId').value = CONFIG.DRIVE_FOLDER_ID !== 'YOUR_DRIVE_FOLDER_ID' ? CONFIG.DRIVE_FOLDER_ID : '';
+</script>
+</body>
+</html>
