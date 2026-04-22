@@ -711,15 +711,15 @@ function saveSettings(){
 // AUTH
 // ═══════════════════════════════════════════════
 function signInWithGoogle(){
-  if(CONFIG.CLIENT_ID === 'YOUR_CLIENT_ID.apps.googleusercontent.com'){
-    toast('⚙️ กรุณาตั้งค่า Client ID ก่อนในหน้า ตั้งค่าระบบ','error'); return;
+  if(!window.google || !window.google.accounts){
+    toast('กำลังโหลด Google API... รอสักครู่แล้วลองใหม่','info');
+    return;
   }
-  if(!window.google){ toast('กำลังโหลด Google API...','info'); initGoogleAuth(); return; }
-  state.tokenClient.requestAccessToken();
+  if(!state.tokenClient){ initGoogleAuth(); }
+  state.tokenClient.requestAccessToken({ prompt:'select_account' });
 }
 
 function initGoogleAuth(){
-  google.accounts.id.initialize({ client_id: CONFIG.CLIENT_ID, callback: handleCredential });
   state.tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CONFIG.CLIENT_ID,
     scope: CONFIG.SCOPES,
@@ -1271,10 +1271,15 @@ function toast(msg, type='info'){
 // INIT
 // ═══════════════════════════════════════════════
 loadSettings();
-// Load Google Identity Services
 const script = document.createElement('script');
 script.src = 'https://accounts.google.com/gsi/client';
-script.onload = () => { if(CONFIG.CLIENT_ID !== 'YOUR_CLIENT_ID.apps.googleusercontent.com') initGoogleAuth(); };
+script.async = true;
+script.defer = true;
+script.onload = () => {
+  if(window.google && window.google.accounts){
+    initGoogleAuth();
+  }
+};
 document.head.appendChild(script);
 
 // Pre-fill settings
