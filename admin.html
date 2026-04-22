@@ -670,7 +670,7 @@ const CONFIG = {
   CLIENT_ID: '909631868562-7pis3hknhjvjf026161ncpbcgifg6jbl.apps.googleusercontent.com',
   SPREADSHEET_ID: '1tCV84EUwh2eSYjjIsbDrWYHR8FZPfIDh6DDZbbmDzk0',
   DRIVE_FOLDER_ID: '1RBUqtugkpq_oq6ECDTs8weNM2Ipg50AP',
-  SCOPES: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile openid',
+  SCOPES: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file',
   SHEET_NAMES: { herbs:'สมุนไพร', tastes:'รสยา', pikad:'พิกัดยา', refs:'แหล่งอ้างอิง' },
   ALLOWED_EMAILS: ['phukadungclinicthai@gmail.com','rawiwan815@gmail.com']
 };
@@ -708,33 +708,67 @@ function saveSettings(){
 }
 
 // ═══════════════════════════════════════════════
-// AUTH
+// AUTH — 2 ขั้นตอน: Sign In → ขอ API Token
 // ═══════════════════════════════════════════════
 function signInWithGoogle(){
   if(!window.google || !window.google.accounts){
-    toast('กำลังโหลด Google API... รอสักครู่แล้วลองใหม่','info');
-    return;
+    toast('กำลังโหลด Google API...','info'); return;
   }
-  initGoogleAuth();
-  state.tokenClient.requestAccessToken({ prompt:'select_account' });
-}
-
-function initGoogleAuth(){
-  state.tokenClient = google.accounts.oauth2.initTokenClient({
+  // ขั้นตอน 1: Sign In ด้วย Google Identity (popup)
+  google.accounts.id.initialize({
     client_id: CONFIG.CLIENT_ID,
-    scope: CONFIG.SCOPES,
-    callback: async(resp) => {
-      if(resp.error){
-        toast('เข้าสู่ระบบไม่สำเร็จ: '+resp.error,'error');
-        return;
-      }
-      state.accessToken = resp.access_token;
-      await fetchUserInfo();
-    },
-    error_callback: (err) => {
-      toast('เกิดข้อผิดพลาด: '+err.type,'error');
+    callback: handleSignIn,
+    auto_select: false,
+    cancel_on_tap_outside: true,
+  });
+  google.accounts.id.prompt((notification) => {
+    if(notification.isNotDisplayed() || notification.isSkippedMoment()){
+      // ถ้า One Tap ไม่แสดง ใช้ Token Client แทน
+      requestApiToken();
     }
   });
+}
+
+function handleSignIn(response){
+  // Decode JWT credential
+  try {
+    const payload = JSON.parse(atob(response.credential.split('.')[1]));
+    state.user = {
+      name: payload.name,
+      email: payload.email,
+      picture: payload.picture
+    };
+    // ขั้นตอน 2: ขอ API Token สำหรับ Sheets
+    requestApiToken();
+  } catch(e) {
+    toast('เกิดข้อผิดพลาด: '+e.message,'error');
+  }
+}
+
+function requestApiToken(){
+  if(!state.tokenClient){
+    state.tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: CONFIG.CLIENT_ID,
+      scope: CONFIG.SCOPES,
+      prompt: '',
+      callback: async(resp) => {
+        if(resp.error){
+          toast('ขอสิทธิ์ไม่สำเร็จ: '+resp.error,'error'); return;
+        }
+        state.accessToken = resp.access_token;
+        // ถ้ายังไม่มีข้อมูล user ให้ดึงเพิ่ม
+        if(!state.user){
+          await fetchUserInfo();
+        } else {
+          enterApp();
+        }
+      },
+      error_callback: (err) => {
+        toast('เกิดข้อผิดพลาด: '+err.type,'error');
+      }
+    });
+  }
+  state.tokenClient.requestAccessToken({ prompt: state.user ? '' : 'select_account' });
 }
 
 async function fetchUserInfo(){
@@ -743,9 +777,11 @@ async function fetchUserInfo(){
       { headers:{ Authorization:'Bearer '+state.accessToken }});
     if(!res.ok) throw new Error('HTTP '+res.status);
     const info = await res.json();
-    state.user = info;
+    state.user = { name: info.name, email: info.email, picture: info.picture };
     enterApp();
-  }catch(e){ toast('ดึงข้อมูลผู้ใช้ไม่สำเร็จ: '+e.message,'error'); }
+  }catch(e){
+    toast('ดึงข้อมูลผู้ใช้ไม่สำเร็จ: '+e.message,'error');
+  }
 }
 
 function demoLogin(){
@@ -766,7 +802,11 @@ function enterApp(){
 }
 
 function signOut(){
-  state.user = null; state.accessToken = null; state.demo = false;
+  if(window.google && window.google.accounts && state.user){
+    google.accounts.id.revoke(state.user.email, ()=>{});
+  }
+  state.user = null; state.accessToken = null;
+  state.tokenClient = null; state.demo = false;
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('app').classList.remove('visible');
   toast('ออกจากระบบแล้ว','info');
@@ -1275,16 +1315,11 @@ function toast(msg, type='info'){
 // INIT
 // ═══════════════════════════════════════════════
 loadSettings();
-const script = document.createElement('script');
-script.src = 'https://accounts.google.com/gsi/client';
-script.async = true;
-script.defer = true;
-script.onload = () => {
-  if(window.google && window.google.accounts){
-    initGoogleAuth();
-  }
-};
-document.head.appendChild(script);
+const gsiScript = document.createElement('script');
+gsiScript.src = 'https://accounts.google.com/gsi/client';
+gsiScript.async = true;
+gsiScript.defer = true;
+document.head.appendChild(gsiScript);
 
 // Pre-fill settings
 document.getElementById('settingClientId').value = CONFIG.CLIENT_ID !== 'YOUR_CLIENT_ID.apps.googleusercontent.com' ? CONFIG.CLIENT_ID : '';
