@@ -715,7 +715,7 @@ function signInWithGoogle(){
     toast('กำลังโหลด Google API... รอสักครู่แล้วลองใหม่','info');
     return;
   }
-  if(!state.tokenClient){ initGoogleAuth(); }
+  initGoogleAuth();
   state.tokenClient.requestAccessToken({ prompt:'select_account' });
 }
 
@@ -724,9 +724,15 @@ function initGoogleAuth(){
     client_id: CONFIG.CLIENT_ID,
     scope: CONFIG.SCOPES,
     callback: async(resp) => {
-      if(resp.error){ toast('เข้าสู่ระบบไม่สำเร็จ: '+resp.error,'error'); return; }
+      if(resp.error){
+        toast('เข้าสู่ระบบไม่สำเร็จ: '+resp.error,'error');
+        return;
+      }
       state.accessToken = resp.access_token;
       await fetchUserInfo();
+    },
+    error_callback: (err) => {
+      toast('เกิดข้อผิดพลาด: '+err.type,'error');
     }
   });
 }
