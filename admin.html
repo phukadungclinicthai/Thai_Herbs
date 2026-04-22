@@ -670,7 +670,7 @@ const CONFIG = {
   CLIENT_ID: '909631868562-7pis3hknhjvjf026161ncpbcgifg6jbl.apps.googleusercontent.com',
   SPREADSHEET_ID: '1tCV84EUwh2eSYjjIsbDrWYHR8FZPfIDh6DDZbbmDzk0',
   DRIVE_FOLDER_ID: '1RBUqtugkpq_oq6ECDTs8weNM2Ipg50AP',
-  SCOPES: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file',
+  SCOPES: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile openid',
   SHEET_NAMES: { herbs:'สมุนไพร', tastes:'รสยา', pikad:'พิกัดยา', refs:'แหล่งอ้างอิง' },
   ALLOWED_EMAILS: ['phukadungclinicthai@gmail.com','rawiwan815@gmail.com']
 };
@@ -739,15 +739,13 @@ function initGoogleAuth(){
 
 async function fetchUserInfo(){
   try{
-    const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo',
+    const res = await fetch('https://www.googleapis.com/oauth2/v2/userinfo',
       { headers:{ Authorization:'Bearer '+state.accessToken }});
+    if(!res.ok) throw new Error('HTTP '+res.status);
     const info = await res.json();
-    if(!CONFIG.ALLOWED_EMAILS.includes(info.email)){
-      toast('❌ อีเมลนี้ไม่มีสิทธิ์เข้าใช้งาน','error'); return;
-    }
     state.user = info;
     enterApp();
-  }catch(e){ toast('เกิดข้อผิดพลาด: '+e.message,'error'); }
+  }catch(e){ toast('ดึงข้อมูลผู้ใช้ไม่สำเร็จ: '+e.message,'error'); }
 }
 
 function demoLogin(){
