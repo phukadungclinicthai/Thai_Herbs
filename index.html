@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>สมุนไพรไทย — ภูกาดังคลินิกไทย</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  font-family:'Sarabun',sans-serif;
+  background:#0d1f16;
+  color:#f5f0e8;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── BACKGROUND ── */
+.bg {
+  position:fixed; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse at 15% 40%, rgba(82,183,136,.18) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 20%, rgba(201,168,76,.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(45,106,79,.25) 0%, transparent 55%),
+    #0d1f16;
+}
+.leaf-pattern {
+  position:fixed; inset:0; z-index:0; opacity:.035;
+  background-image:url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M60 0 C90 30 90 90 60 120 C30 90 30 30 60 0Z' fill='%2352b788'/%3E%3C/svg%3E");
+}
+
+/* ── WRAPPER ── */
+.wrapper {
+  position:relative; z-index:1;
+  min-height:100vh;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding:2rem;
+}
+
+/* ── HEADER ── */
+.header {
+  text-align:center;
+  margin-bottom:4rem;
+  animation:fadeUp .8s ease both;
+}
+.header-badge {
+  display:inline-block;
+  padding:.35rem 1.2rem;
+  border:1px solid rgba(201,168,76,.4);
+  border-radius:50px;
+  font-size:.72rem;
+  letter-spacing:.25em;
+  text-transform:uppercase;
+  color:rgba(201,168,76,.9);
+  margin-bottom:1.5rem;
+}
+.header-logo { font-size:3.5rem; margin-bottom:.75rem; }
+.header-title {
+  font-family:'Playfair Display',serif;
+  font-size:clamp(2.5rem,6vw,4.5rem);
+  line-height:1.1;
+  color:#f5f0e8;
+  margin-bottom:.75rem;
+}
+.header-title em { font-style:italic; color:#52b788; }
+.header-sub {
+  font-size:1.05rem;
+  color:rgba(245,240,232,.55);
+  font-weight:300;
+  letter-spacing:.04em;
+  max-width:480px;
+  margin:0 auto;
+  line-height:1.7;
+}
+
+/* ── CARDS ── */
+.cards {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1.5rem;
+  max-width:780px;
+  width:100%;
+  animation:fadeUp .8s .2s ease both;
+}
+
+.card {
+  position:relative;
+  border-radius:24px;
+  padding:2.5rem 2rem;
+  cursor:pointer;
+  text-decoration:none;
+  color:inherit;
+  overflow:hidden;
+  transition:all .35s cubic-bezier(.34,1.2,.64,1);
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:1rem;
+}
+
+.card:hover {
+  transform:translateY(-6px);
+}
+
+/* Main site card */
+.card-main {
+  background:linear-gradient(135deg, rgba(45,106,79,.6) 0%, rgba(26,58,42,.8) 100%);
+  border:1px solid rgba(82,183,136,.25);
+  box-shadow:0 8px 32px rgba(0,0,0,.3);
+}
+.card-main:hover {
+  border-color:rgba(82,183,136,.5);
+  box-shadow:0 20px 50px rgba(82,183,136,.15), 0 8px 32px rgba(0,0,0,.3);
+}
+
+/* Admin card */
+.card-admin {
+  background:linear-gradient(135deg, rgba(26,40,30,.8) 0%, rgba(15,25,18,.9) 100%);
+  border:1px solid rgba(201,168,76,.2);
+  box-shadow:0 8px 32px rgba(0,0,0,.3);
+}
+.card-admin:hover {
+  border-color:rgba(201,168,76,.45);
+  box-shadow:0 20px 50px rgba(201,168,76,.1), 0 8px 32px rgba(0,0,0,.3);
+}
+
+/* Card glow effect */
+.card::before {
+  content:'';
+  position:absolute; inset:0;
+  opacity:0;
+  transition:opacity .35s;
+  border-radius:24px;
+}
+.card-main::before {
+  background:radial-gradient(ellipse at 30% 30%, rgba(82,183,136,.15), transparent 70%);
+}
+.card-admin::before {
+  background:radial-gradient(ellipse at 70% 30%, rgba(201,168,76,.12), transparent 70%);
+}
+.card:hover::before { opacity:1; }
+
+.card-icon {
+  width:56px; height:56px;
+  border-radius:16px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.7rem;
+  flex-shrink:0;
+}
+.card-main .card-icon { background:rgba(82,183,136,.2); }
+.card-admin .card-icon { background:rgba(201,168,76,.15); }
+
+.card-content { flex:1; }
+.card-label {
+  font-size:.7rem;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  margin-bottom:.4rem;
+  font-weight:700;
+}
+.card-main .card-label { color:rgba(82,183,136,.8); }
+.card-admin .card-label { color:rgba(201,168,76,.8); }
+
+.card-title {
+  font-family:'Playfair Display',serif;
+  font-size:1.55rem;
+  color:#f5f0e8;
+  margin-bottom:.5rem;
+  line-height:1.2;
+}
+.card-desc {
+  font-size:.85rem;
+  color:rgba(245,240,232,.55);
+  line-height:1.65;
+}
+
+.card-arrow {
+  position:absolute;
+  bottom:1.8rem; right:1.8rem;
+  width:36px; height:36px;
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1rem;
+  transition:all .3s;
+}
+.card-main .card-arrow { background:rgba(82,183,136,.2); color:#52b788; }
+.card-admin .card-arrow { background:rgba(201,168,76,.15); color:#c9a84c; }
+.card:hover .card-arrow { transform:translate(3px,-3px); }
+
+/* ── STATS BAR ── */
+.stats-bar {
+  display:flex; gap:2.5rem;
+  margin-top:3rem;
+  animation:fadeUp .8s .4s ease both;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+.stat {
+  text-align:center;
+  opacity:.7;
+  transition:opacity .2s;
+}
+.stat:hover { opacity:1; }
+.stat-num {
+  font-family:'Playfair Display',serif;
+  font-size:1.8rem;
+  color:#c9a84c;
+  line-height:1;
+}
+.stat-lbl {
+  font-size:.72rem;
+  color:rgba(245,240,232,.5);
+  letter-spacing:.08em;
+  margin-top:.25rem;
+}
+
+/* ── DIVIDER ── */
+.divider {
+  width:1px; height:32px;
+  background:rgba(245,240,232,.1);
+  align-self:center;
+}
+
+/* ── FOOTER ── */
+.footer {
+  position:relative; z-index:1;
+  text-align:center;
+  padding:1.5rem 2rem;
+  color:rgba(245,240,232,.25);
+  font-size:.75rem;
+  letter-spacing:.05em;
+}
+.footer span { color:rgba(82,183,136,.6); }
+
+/* ── FLOATING LEAVES ── */
+.leaf {
+  position:fixed;
+  font-size:1.2rem;
+  opacity:.08;
+  animation:float linear infinite;
+  pointer-events:none;
+  z-index:0;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(24px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes float {
+  from { transform:translateY(100vh) rotate(0deg); opacity:0; }
+  10%  { opacity:.08; }
+  90%  { opacity:.08; }
+  to   { transform:translateY(-100px) rotate(360deg); opacity:0; }
+}
+
+@media(max-width:580px) {
+  .cards { grid-template-columns:1fr; max-width:400px; }
+  .header-title { font-size:2.2rem; }
+  .stats-bar { gap:1.5rem; }
+  .divider { display:none; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="leaf-pattern"></div>
+
+<!-- Floating leaves -->
+<div class="leaf" style="left:8%;animation-duration:18s;animation-delay:0s">🌿</div>
+<div class="leaf" style="left:25%;animation-duration:22s;animation-delay:4s">🍃</div>
+<div class="leaf" style="left:55%;animation-duration:16s;animation-delay:8s">🌿</div>
+<div class="leaf" style="left:78%;animation-duration:20s;animation-delay:2s">🍃</div>
+<div class="leaf" style="left:90%;animation-duration:25s;animation-delay:12s">🌱</div>
+
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-badge">ภูกาดังคลินิกไทย</div>
+    <div class="header-logo">🌿</div>
+    <h1 class="header-title">คลังความรู้<br><em>สมุนไพรไทย</em></h1>
+    <p class="header-sub">รวบรวมภูมิปัญญาการแพทย์แผนไทย<br>จากตำราดั้งเดิมและงานวิจัยสมัยใหม่</p>
+  </div>
+
+  <!-- CARDS -->
+  <div class="cards">
+
+    <!-- Main Site -->
+    <a href="herbs.html" class="card card-main">
+      <div class="card-icon">🌿</div>
+      <div class="card-content">
+        <div class="card-label">สำหรับทุกคน</div>
+        <div class="card-title">คลังสมุนไพร</div>
+        <div class="card-desc">ค้นหาและเรียนรู้สมุนไพรไทย รสยา และพิกัดยาแผนไทย</div>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+
+    <!-- Admin -->
+    <a href="admin.html" class="card card-admin">
+      <div class="card-icon">⚙️</div>
+      <div class="card-content">
+        <div class="card-label">สำหรับผู้ดูแล</div>
+        <div class="card-title">จัดการข้อมูล</div>
+        <div class="card-desc">เพิ่ม แก้ไข และจัดการข้อมูลสมุนไพรในคลังความรู้</div>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-num">20+</div>
+      <div class="stat-lbl">สมุนไพร</div>
+    </div>
+    <div class="divider"></div>
+    <div class="stat">
+      <div class="stat-num">9</div>
+      <div class="stat-lbl">รสยา</div>
+    </div>
+    <div class="divider"></div>
+    <div class="stat">
+      <div class="stat-num">8</div>
+      <div class="stat-lbl">พิกัดยา</div>
+    </div>
+    <div class="divider"></div>
+    <div class="stat">
+      <div class="stat-num">10+</div>
+      <div class="stat-lbl">แหล่งอ้างอิง</div>
+    </div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <p>© 2568 <span>ภูกาดังคลินิกไทย</span> · ข้อมูลนี้ไม่ใช่คำแนะนำทางการแพทย์</p>
+</footer>
+
+</body>
+</html>
