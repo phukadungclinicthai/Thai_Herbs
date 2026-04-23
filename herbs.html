@@ -91,11 +91,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(26,58,42,.96);backdrop-fil
 .taste-ex{font-size:.7rem;padding:.13rem .5rem;background:#e8f5e9;border-radius:50px;color:var(--green-mid);font-weight:600}
 
 .pikad-section{background:var(--paper);padding:3rem 2rem}
-.pikad-group{max-width:1200px;margin:0 auto 2.5rem}
-.pikad-group-title{display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:2px solid rgba(82,183,136,.3)}
-.pikad-group-label{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--green-deep)}
-.pikad-group-badge{padding:.2rem .75rem;border-radius:50px;background:var(--green-mid);color:white;font-size:.72rem;font-weight:700;letter-spacing:.06em}
-.pikad-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.5rem}
+.pikad-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.5rem;max-width:1200px;margin:1.5rem auto 0}
 .pikad-card{background:white;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.06);cursor:pointer;transition:all .3s;border:1px solid rgba(82,183,136,.1)}
 .pikad-card:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(26,58,42,.13)}
 .pikad-head{padding:1.3rem 1.5rem .9rem;display:flex;align-items:flex-start;gap:1rem}
@@ -220,7 +216,7 @@ footer span{color:var(--green-light)}
   <div style="max-width:1200px;margin:0 auto">
     <div class="section-head"><h2 class="section-title">พิกัดยาไทย</h2><span class="section-count" id="pikadCount"></span></div>
     <div id="pikadLoading" class="loading-screen"><div class="spinner"></div><div class="loading-text">กำลังโหลด...</div></div>
-    <div id="pikadGrid"></div>
+    <div class="pikad-grid" id="pikadGrid"></div>
   </div>
 </section>
 
@@ -297,7 +293,7 @@ async function fetchSheet(url){
   return parseCSV(await res.text());
 }
 
-let herbsData=[],tastesData=[],pikadData=[],refsData=[];
+let herbsData = [{"ชื่อไทย": "ขิง", "ชื่ออังกฤษ": "Ginger", "ชื่อวิทยาศาสตร์": "Zingiber officinale", "หมวดสรรพคุณ": "ย่อยอาหาร,ลดอักเสบ,ระบบหายใจ", "รสยา": "เผ็ดร้อน", "ส่วนที่ใช้": "เหง้า,ราก", "ฤทธิ์": "ร้อน", "สรรพคุณแยกตามส่วน": "เหง้า: ลดคลื่นไส้อาเจียน แก้ท้องอืด;ราก: ขับลม บรรเทาอาการหวัด", "วิธีใช้": "ใช้เหง้าสด 5-10 กรัม ต้มกับน้ำดื่ม หรือฝนกับน้ำผึ้งรับประทาน ใช้ได้ทั้งแบบสด แห้ง และแปรรูป", "ข้อควรระวัง": "ควรระวังในผู้ที่มีแผลในกระเพาะอาหาร หรือรับประทานยาต้านการแข็งตัวของเลือด", "รูปภาพ_URL": "https://s.isanook.com/he/0/ud/2/12969/ginger.jpg?ip/crop/w1200h700/q80/webp"}, {"ชื่อไทย": "ฟ้าทลายโจร", "ชื่ออังกฤษ": "Green Chiretta", "ชื่อวิทยาศาสตร์": "Andrographis paniculata", "หมวดสรรพคุณ": "ภูมิคุ้มกัน,ลดอักเสบ,ระบบหายใจ", "รสยา": "ขม", "ส่วนที่ใช้": "ใบ,ลำต้น", "ฤทธิ์": "เย็น", "สรรพคุณแยกตามส่วน": "ใบ: ลดไข้ ต้านเชื้อแบคทีเรีย;ลำต้น: กระตุ้นภูมิคุ้มกัน ลดการอักเสบ", "วิธีใช้": "รับประทานในรูปแบบยาเม็ดตามคำแนะนำบนฉลาก หรือใช้ใบสด 3-5 กรัม ต้มน้ำดื่ม วันละ 3 ครั้งหลังอาหาร", "ข้อควรระวัง": "ไม่ควรรับประทานติดต่อกันเกิน 7 วัน อาจทำให้ความดันโลหิตต่ำในผู้ป่วยบางราย", "รูปภาพ_URL": "https://www.prachachat.net/wp-content/uploads/2021/07/%E0%B8%9F%E0%B9%89%E0%B8%B2%E0%B8%97%E0%B8%B0%E0%B8%A5%E0%B8%B2%E0%B8%A2%E0%B9%82%E0%B8%88%E0%B8%A3.jpg"}, {"ชื่อไทย": "บัวบก", "ชื่ออังกฤษ": "Gotu Kola", "ชื่อวิทยาศาสตร์": "Centella asiatica", "หมวดสรรพคุณ": "ผิวพรรณ,บำรุงสมอง", "รสยา": "จืด", "ส่วนที่ใช้": "ใบ,ต้น", "ฤทธิ์": "เย็น", "สรรพคุณแยกตามส่วน": "ใบ: บำรุงผิวพรรณ เพิ่มความจำ;ต้น: สมานแผล ต้านอนุมูลอิสระ", "วิธีใช้": "ใบสด 40-80 กรัม คั้นน้ำดื่มวันละครั้ง หรือใช้ทาภายนอกรักษาแผลและฟื้นฟูผิว", "ข้อควรระวัง": "อาจทำให้ง่วงนอนในบางคน ควรระวังในผู้ที่มีโรคตับ", "รูปภาพ_URL": "https://inwfile.com/s-dm/agc5xl.jpg"}, {"ชื่อไทย": "ว่านหางจระเข้", "ชื่ออังกฤษ": "Aloe Vera", "ชื่อวิทยาศาสตร์": "Aloe vera", "หมวดสรรพคุณ": "ผิวพรรณ,ย่อยอาหาร", "รสยา": "จืด", "ส่วนที่ใช้": "วุ้นในใบ", "ฤทธิ์": "เย็น", "สรรพคุณแยกตามส่วน": "วุ้น: บำรุงผิว สมานแผลไฟไหม้ ให้ความชุ่มชื้น;ใบ: ลดสิว บรรเทาอาการแสบร้อน", "วิธีใช้": "ใช้เนื้อวุ้นภายในทาผิวโดยตรง สำหรับรับประทานใช้เนื้อวุ้น 2-3 ช้อนโต๊ะ ผสมน้ำผลไม้ดื่ม", "ข้อควรระวัง": "ยางสีเหลืองระหว่างผิวและวุ้นมีฤทธิ์ระบายแรง", "รูปภาพ_URL": "https://us-fbcloud.net/wb/data/1437/1437214-img.vs30lb.1gxrk.opsbax74.webp"}, {"ชื่อไทย": "ขมิ้นชัน", "ชื่ออังกฤษ": "Turmeric", "ชื่อวิทยาศาสตร์": "Curcuma longa", "หมวดสรรพคุณ": "ย่อยอาหาร,ลดอักเสบ,ผิวพรรณ", "รสยา": "เผ็ดร้อน,ขม", "ส่วนที่ใช้": "เหง้า", "ฤทธิ์": "ร้อน", "สรรพคุณแยกตามส่วน": "เหง้า: ต้านการอักเสบ รักษาแผลในกระเพาะ บำรุงตับ;ผง: บำรุงผิว ต้านมะเร็งขั้นต้น", "วิธีใช้": "รับประทานผงขมิ้น 500 มก.-1 กรัม/วัน หรือใช้เหง้าสด 1-3 กรัม ต้มน้ำดื่ม การรับประทานคู่กับพริกไทยดำช่วยเพิ่มการดูดซึม", "ข้อควรระวัง": "อาจรบกวนการดูดซึมธาตุเหล็ก ไม่ควรรับประทานปริมาณมากในผู้ที่มีนิ่วในถุงน้ำดี", "รูปภาพ_URL": ""}, {"ชื่อไทย": "กระชาย", "ชื่ออังกฤษ": "Fingerroot", "ชื่อวิทยาศาสตร์": "Boesenbergia rotunda", "หมวดสรรพคุณ": "ภูมิคุ้มกัน,ย่อยอาหาร", "รสยา": "เผ็ดร้อน", "ส่วนที่ใช้": "ราก,เหง้า", "ฤทธิ์": "ร้อน", "สรรพคุณแยกตามส่วน": "ราก: ต้านเชื้อไวรัส แก้ท้องอืด;เหง้า: บำรุงสมรรถภาพทางเพศ รักษาแผลในปาก", "วิธีใช้": "รากสด 5-10 กรัม ต้มน้ำดื่ม หรือรับประทานเป็นยาแคปซูล ใช้เป็นส่วนผสมในอาหารไทยได้", "ข้อควรระวัง": "ยังไม่มีข้อมูลการใช้ในระยะยาว", "รูปภาพ_URL": ""}, {"ชื่อไทย": "มะขามป้อม", "ชื่ออังกฤษ": "Indian Gooseberry", "ชื่อวิทยาศาสตร์": "Phyllanthus emblica", "หมวดสรรพคุณ": "ภูมิคุ้มกัน,ผิวพรรณ", "รสยา": "เปรี้ยว,ฝาด,หวาน", "ส่วนที่ใช้": "ผล", "ฤทธิ์": "เย็น", "สรรพคุณแยกตามส่วน": "ผล: วิตามินซีสูง ต้านอนุมูลอิสระ ชะลอวัย;เมล็ด: บำรุงผม เสริมภูมิคุ้มกัน", "วิธีใช้": "รับประทานผลสดหรือน้ำคั้น 15-30 มล./วัน ใช้ในรูปแบบผง ยาเม็ด หรือน้ำมันนวดผม", "ข้อควรระวัง": "ผลสดมีรสเปรี้ยวมาก ผู้ที่มีกรดไหลย้อนควรระวัง", "รูปภาพ_URL": "https://www.doctor.or.th/sites/default/files/9l79g.JPG"}, {"ชื่อไทย": "กระเพรา", "ชื่ออังกฤษ": "Holy Basil", "ชื่อวิทยาศาสตร์": "Ocimum tenuiflorum", "หมวดสรรพคุณ": "ย่อยอาหาร,ระบบหายใจ,ลดอักเสบ", "รสยา": "เผ็ดร้อน", "ส่วนที่ใช้": "ใบ", "ฤทธิ์": "ร้อน", "สรรพคุณแยกตามส่วน": "ใบ: แก้ท้องอืด ขับลม ต้านแบคทีเรีย;ดอก: บรรเทาความเครียด รักษาหวัด", "วิธีใช้": "ใบสด 10-20 ใบ ต้มดื่มเป็นชา หรือรับประทานในอาหาร เช่น ผัดกะเพรา วันละ 1-2 ครั้ง", "ข้อควรระวัง": "การรับประทานในปริมาณมากอาจส่งผลต่อการแข็งตัวของเลือด", "รูปภาพ_URL": "https://nurturedinnorfolk.co.uk/wp-content/uploads/2022/04/Thai-Holy-Basil-Kra-Pao.jpg"}, {"ชื่อไทย": "ตะไคร้", "ชื่ออังกฤษ": "Lemongrass", "ชื่อวิทยาศาสตร์": "Cymbopogon citratus", "หมวดสรรพคุณ": "ย่อยอาหาร,ผิวพรรณ", "รสยา": "เผ็ดร้อน", "ส่วนที่ใช้": "ลำต้น,ราก", "ฤทธิ์": "ร้อน", "สรรพคุณแยกตามส่วน": "ลำต้น: ขับลม ลดไข้ ต้านเชื้อรา;ราก: ขับปัสสาวะ ลดความดันโลหิต", "วิธีใช้": "ต้นสด 1-2 ต้น ต้มน้ำดื่มเป็นชา หรือใช้ในอาหาร น้ำมันหอมระเหยใช้อบไอน้ำหรือทาผิวภายนอก", "ข้อควรระวัง": "น้ำมันหอมระเหยเข้มข้นไม่ควรใช้กับผิวโดยตรง ต้องผสมกับน้ำมันตัวพา", "รูปภาพ_URL": ""}, {"ชื่อไทย": "พลู", "ชื่ออังกฤษ": "Betel Leaf", "ชื่อวิทยาศาสตร์": "Piper betle", "หมวดสรรพคุณ": "ย่อยอาหาร,ผิวพรรณ,ลดอักเสบ", "รสยา": "เผ็ดร้อน", "ส่วนที่ใช้": "ใบ", "ฤทธิ์": "ร้อน", "สรรพคุณแยกตามส่วน": "ใบ: ต้านเชื้อแบคทีเรีย ดับกลิ่นปาก รักษาแผลสด ลดอักเสบ;น้ำคั้น: ขับเสมหะ", "วิธีใช้": "ใบสด 3-5 ใบ คั้นน้ำทาบาดแผล หรือเคี้ยวเพื่อดับกลิ่นปาก ต้มน้ำอาบสำหรับโรคผิวหนัง", "ข้อควรระวัง": "การเคี้ยวหมากซึ่งรวมพลูเป็นเวลานาน เกี่ยวข้องกับความเสี่ยงมะเร็งช่องปาก", "รูปภาพ_URL": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Piper_betle_leaves.jpg/640px-Piper_betle_leaves.jpg"}, {"ชื่อไทย": "มะกรูด", "ชื่ออังกฤษ": "Kaffir Lime", "ชื่อวิทยาศาสตร์": "Citrus hystrix", "หมวดสรรพคุณ": "ย่อยอาหาร,ผิวพรรณ,ระบบหายใจ", "รสยา": "เปรี้ยว", "ส่วนที่ใช้": "ผล,ใบ,ผิวเปลือก", "ฤทธิ์": "เย็น", "สรรพคุณแยกตามส่วน": "ผิวเปลือก: บำรุงผมและหนังศีรษะ;ใบ: ขับลม ฟอกเลือด;น้ำ: ลดความเครียด ต้านเชื้อรา", "วิธีใช้": "น้ำมะกรูดผสมน้ำผึ้งดื่มบำรุงร่างกาย ผิวมะกรูดต้มไอน้ำสูดหายใจ น้ำมันหอมระเหยนวดหนังศีรษะ", "ข้อควรระวัง": "น้ำมะกรูดมีกรดสูง ไม่ควรดื่มเข้มข้นขณะท้องว่าง", "รูปภาพ_URL": ""}, {"ชื่อไทย": "ไพล", "ชื่ออังกฤษ": "Plai", "ชื่อวิทยาศาสตร์": "Zingiber cassumunar", "หมวดสรรพคุณ": "ลดอักเสบ,ผิวพรรณ", "รสยา": "เผ็ดร้อน", "ส่วนที่ใช้": "เหง้า", "ฤทธิ์": "ร้อน", "สรรพคุณแยกตามส่วน": "เหง้า: ลดปวดกล้ามเนื้อ ต้านการอักเสบ แก้ฟกช้ำ;ผง: บรรเทาข้ออักเสบ รักษาโรคผิวหนัง", "วิธีใช้": "เหง้าสด ตำผสมเกลือพอกบริเวณที่ปวด หรือต้มน้ำอาบ ยาหม่องไพลใช้นวดบรรเทาอาการปวด", "ข้อควรระวัง": "หากใช้ต่อเนื่องนานให้สังเกตอาการแพ้ผิวหนัง", "รูปภาพ_URL": "https://media.istockphoto.com/id/1345424423/photo/plai-thai-name-zingiber-cassumunar-roxb-ginger.jpg?s=612x612&w=0&k=20&c=5kJaWEWj_aZGzP4Rv37_yoXfHFkqlgwzPzU0kCHR3oI="}, {"ชื่อไทย": "รางจืด", "ชื่ออังกฤษ": "Blue Trumpet Vine", "ชื่อวิทยาศาสตร์": "Thunbergia laurifolia", "หมวดสรรพคุณ": "ภูมิคุ้มกัน,ถอนพิษ", "รสยา": "จืด", "ส่วนที่ใช้": "ใบ", "ฤทธิ์": "เย็น", "สรรพคุณแยกตามส่วน": "ใบ: ถอนพิษ ล้างพิษในร่างกาย ลดไข้;ราก: ต้านอนุมูลอิสระ บำรุงตับ", "วิธีใช้": "ใบสด 10-15 ใบ หรือแห้ง 5-7 กรัม ต้มน้ำดื่ม วันละ 1-2 ครั้ง", "ข้อควรระวัง": "ฤทธิ์ขับยาออกจากร่างกายอาจลดประสิทธิภาพของยาแผนปัจจุบัน", "รูปภาพ_URL": ""}, {"ชื่อไทย": "หญ้าหนวดแมว", "ชื่ออังกฤษ": "Cat's Whiskers", "ชื่อวิทยาศาสตร์": "Orthosiphon aristatus", "หมวดสรรพคุณ": "ขับปัสสาวะ,ภูมิคุ้มกัน", "รสยา": "จืด", "ส่วนที่ใช้": "ใบ", "ฤทธิ์": "เย็น", "สรรพคุณแยกตามส่วน": "ใบ: ขับปัสสาวะ รักษานิ่วไต ลดน้ำตาลในเลือด;ดอก: ลดความดัน ต้านแบคทีเรีย", "วิธีใช้": "ใบแห้ง 6-12 กรัม ต้มน้ำดื่มวันละ 3 ครั้ง ดื่มน้ำมากๆ ร่วมด้วย", "ข้อควรระวัง": "ไม่ควรใช้ในผู้ป่วยที่ต้องจำกัดของเหลว", "รูปภาพ_URL": "https://woodyplants.com/assets/plant/big/cat-whiskers-plant-big-6462.jpg"}, {"ชื่อไทย": "เพชรสังฆาต", "ชื่ออังกฤษ": "Devil's Backbone", "ชื่อวิทยาศาสตร์": "Cissus quadrangularis", "หมวดสรรพคุณ": "ลดอักเสบ", "รสยา": "ฝาด,เปรี้ยว", "ส่วนที่ใช้": "ก้าน", "ฤทธิ์": "เย็น", "สรรพคุณแยกตามส่วน": "ก้าน: เสริมความแข็งแรงกระดูก ลดน้ำหนัก รักษาริดสีดวงทวาร;ผล: ต้านการอักเสบ", "วิธีใช้": "รับประทานในรูปแบบยาแคปซูล หรือต้มน้ำดื่มจากก้านสด", "ข้อควรระวัง": "อาจทำให้ปวดท้องในบางคน", "รูปภาพ_URL": "https://wellnessplant.in/wp-content/uploads/2022/09/hadjod-cissus-quadrangularis.jpg"}, {"ชื่อไทย": "กานพลู", "ชื่ออังกฤษ": "Clove", "ชื่อวิทยาศาสตร์": "Syzygium aromaticum", "หมวดสรรพคุณ": "ย่อยอาหาร,ลดอักเสบ,ระบบหายใจ", "รสยา": "เผ็ดร้อน", "ส่วนที่ใช้": "ดอกตูม", "ฤทธิ์": "ร้อน", "สรรพคุณแยกตามส่วน": "ดอกแห้ง: บรรเทาปวดฟัน ต้านเชื้อแบคทีเรีย ขับลม;น้ำมัน: ลดอักเสบ ต้านเชื้อรา", "วิธีใช้": "น้ำมันกานพลูทาบริเวณที่ปวดฟัน ดอกแห้ง 1-2 ดอก ต้มน้ำดื่ม หรือใช้เป็นส่วนผสมในอาหาร", "ข้อควรระวัง": "น้ำมันกานพลูเข้มข้นมีฤทธิ์กัดกร่อน", "รูปภาพ_URL": "https://media.istockphoto.com/id/500498892/photo/whole-dried-clove-spice-dried-flower-buds-syzygium-aromaticum.jpg?s=612x612&w=0&k=20&c=4l87QBp9_qPjPJdJl4tbXNNjFyHZMj_m-jVGE0xHBGc="}, {"ชื่อไทย": "ชะเอมเทศ", "ชื่ออังกฤษ": "Licorice", "ชื่อวิทยาศาสตร์": "Glycyrrhiza glabra", "หมวดสรรพคุณ": "ระบบหายใจ,ย่อยอาหาร", "รสยา": "หวาน", "ส่วนที่ใช้": "ราก", "ฤทธิ์": "เย็น", "สรรพคุณแยกตามส่วน": "ราก: บรรเทาไอ ลดเสมหะ รักษาแผลในกระเพาะ;สาร Glycyrrhizin: ต้านไวรัส บำรุงต่อมหมวกไต", "วิธีใช้": "รากแห้ง 2-4 กรัม ต้มน้ำดื่ม หรือในรูปแบบชา ยาเม็ด สามารถผสมในยาแผนไทยหลายตำรับ", "ข้อควรระวัง": "อาจทำให้ความดันโลหิตสูงและโพแทสเซียมในเลือดต่ำ", "รูปภาพ_URL": "https://herbalprods.com/wp-content/uploads/2022/08/Licorice-Root-Premium-Dried-Herb.jpg"}, {"ชื่อไทย": "สะระแหน่", "ชื่ออังกฤษ": "Peppermint", "ชื่อวิทยาศาสตร์": "Mentha × piperita", "หมวดสรรพคุณ": "ย่อยอาหาร,ระบบหายใจ", "รสยา": "เผ็ดร้อน", "ส่วนที่ใช้": "ใบ", "ฤทธิ์": "เย็น", "สรรพคุณแยกตามส่วน": "ใบ: บรรเทาปวดหัว แก้คลื่นไส้ ขับลม;น้ำมัน: บรรเทาไอ ดับกลิ่นปาก", "วิธีใช้": "ใบสด 5-10 ใบ ชงเป็นชาดื่ม น้ำมันหอมระเหยทาขมับบรรเทาปวดหัว หรืออาบไอน้ำ", "ข้อควรระวัง": "ในปริมาณมากอาจทำให้แสบร้อน", "รูปภาพ_URL": "https://s.isanook.com/ca/0/ud/274/1371941/14040884251404088455l.jpg?ip/crop/w670h402/q80/jpg"}, {"ชื่อไทย": "ดีปลี", "ชื่ออังกฤษ": "Long Pepper", "ชื่อวิทยาศาสตร์": "Piper retrofractum", "หมวดสรรพคุณ": "ย่อยอาหาร,ระบบหายใจ", "รสยา": "เผ็ดร้อน", "ส่วนที่ใช้": "ผล", "ฤทธิ์": "ร้อน", "สรรพคุณแยกตามส่วน": "ผล: ช่วยย่อยอาหาร แก้ท้องอืด เพิ่มการดูดซึมยา;ราก: บรรเทาไอหืด บำรุงร่างกาย", "วิธีใช้": "ผลแห้ง 1-3 กรัม บดเป็นผงผสมน้ำผึ้งรับประทาน หรือใช้เป็นส่วนผสมในยาตำรับไทย", "ข้อควรระวัง": "ระวังในผู้ที่มีแผลในกระเพาะอาหาร หรือแพ้พริกไทย", "รูปภาพ_URL": "https://thai-herbs.thdata.co/mydear_blog/%E0%B8%94%E0%B8%B5%E0%B8%9B%E0%B8%A5%E0%B8%B503.jpg"}, {"ชื่อไทย": "โกฐจุฬาลัมพา", "ชื่ออังกฤษ": "Sweet Wormwood", "ชื่อวิทยาศาสตร์": "Artemisia annua", "หมวดสรรพคุณ": "ภูมิคุ้มกัน,ลดอักเสบ", "รสยา": "ขม", "ส่วนที่ใช้": "ใบ", "ฤทธิ์": "เย็น", "สรรพคุณแยกตามส่วน": "ใบ: รักษามาลาเรีย ต้านเชื้อโรค ลดไข้;สารสกัด: ต้านการอักเสบ ต้านมะเร็งขั้นต้น", "วิธีใช้": "ใช้ในรูปแบบยาสำเร็จรูปเท่านั้น ไม่ควรใช้สมุนไพรดิบเพราะมี Artemisinin ในปริมาณที่ไม่คงที่", "ข้อควรระวัง": "มีฤทธิ์แรงมาก ต้องใช้ภายใต้การดูแลของแพทย์", "รูปภาพ_URL": ""}, {"ชื่อไทย": "บอระเพ็ด", "ชื่ออังกฤษ": "Tinospora", "ชื่อวิทยาศาสตร์": "Tinospora crispa", "หมวดสรรพคุณ": "ภูมิคุ้มกัน,ลดไข้", "รสยา": "ขม", "ส่วนที่ใช้": "ลำต้น", "ฤทธิ์": "เย็น", "สรรพคุณแยกตามส่วน": "ลำต้น: ลดไข้ ต้านเชื้อแบคทีเรีย ลดน้ำตาลในเลือด;ราก: บำรุงร่างกาย กระตุ้นภูมิคุ้มกัน", "วิธีใช้": "ลำต้นสด 10-20 กรัม ต้มน้ำดื่ม หรือหั่นตากแห้งบดเป็นผง", "ข้อควรระวัง": "ไม่ควรใช้ติดต่อกันนานในผู้ป่วยเบาหวาน อาจทำให้น้ำตาลต่ำ", "รูปภาพ_URL": ""}, {"ชื่อไทย": "ฝักส้มป่อย", "ชื่ออังกฤษ": "Soap Pod", "ชื่อวิทยาศาสตร์": "Acacia concinna", "หมวดสรรพคุณ": "ผิวพรรณ,ขับพิษ", "รสยา": "ฝาด,เปรี้ยว", "ส่วนที่ใช้": "ฝัก", "ฤทธิ์": "เย็น", "สรรพคุณแยกตามส่วน": "ฝัก: สระผม ขจัดรังแค บำรุงเส้นผม;ใบ: ขับพิษ บำรุงเลือด", "วิธีใช้": "ฝักสด 3-5 ฝัก ต้มน้ำสระผม หรือนำใบมาต้มดื่มถอนพิษ", "ข้อควรระวัง": "น้ำจากฝักอาจระคายเคืองตาได้", "รูปภาพ_URL": "https://img.lazcdn.com/g/p/f917573aab6ed8acd5dd7c467abaaec9.jpg_720x720q80.jpg"}];
 let activeFilters={cat:'all',taste:'all',part:'all'};
 let searchQ='';
 
@@ -309,7 +305,6 @@ async function init(){
 async function loadHerbs(){
   try{
     herbsData=await fetchSheet(SHEETS.herbs);
-    herbsData.sort((a,b)=>(a['ชื่อไทย']||'').localeCompare(b['ชื่อไทย']||'','th'));
     document.getElementById('herbsLoading').style.display='none';
     buildFilters(); renderHerbs();
     document.getElementById('statHerbs').textContent=herbsData.length;
@@ -488,50 +483,23 @@ async function loadPikad(){
     document.getElementById('pikadLoading').style.display='none';
     const grid=document.getElementById('pikadGrid');
     grid.innerHTML='';
-
-    // จัดกลุ่มตามจำนวนตัวยา
-    const groups={};
-    pikadData.forEach(p=>{
-      const count=parseInt(p['จำนวนตัวยา'])||0;
-      if(!groups[count])groups[count]=[];
-      groups[count].push(p);
+    pikadData.forEach((p,i)=>{
+      const col=BADGE[i%BADGE.length];
+      const ings=split(p['ตัวยา_ชื่อ']||p['ตัวยา_id']);
+      const uses=split(p['สรรพคุณรวม']).slice(0,3);
+      const card=document.createElement('div');
+      card.className='pikad-card';
+      card.onclick=()=>openPikadModal(p,col);
+      card.innerHTML=`
+        <div class="pikad-head">
+          <div class="pikad-badge" style="background:${col.bg};color:${col.t}">${p['จำนวนตัวยา']||'?'}</div>
+          <div><div class="pikad-name">${p['ชื่อพิกัด']||'—'}</div><div class="pikad-meaning">${p['ความหมาย']||''}</div></div>
+        </div>
+        <div class="pikad-ing-pills">${ings.map(s=>`<span class="pikad-ing">${s}</span>`).join('')}</div>
+        <p class="pikad-desc">${(p['วิธีเตรียม']||'').substring(0,90)}${(p['วิธีเตรียม']||'').length>90?'...':''}</p>
+        <div class="pikad-uses">${uses.map(u=>`<span class="pikad-use">${u}</span>`).join('')}</div>`;
+      grid.appendChild(card);
     });
-    const groupLabels={2:'กลุ่ม 2 — ทวิ',3:'กลุ่ม 3 — ตรี',4:'กลุ่ม 4 — จตุร',5:'กลุ่ม 5 — เบญจ',7:'กลุ่ม 7 — สัตต',8:'กลุ่ม 8 — อัฏฐ',9:'กลุ่ม 9 — นว',10:'กลุ่ม 10 — ทศ'};
-    const sortedCounts=Object.keys(groups).map(Number).sort((a,b)=>a-b);
-
-    sortedCounts.forEach(count=>{
-      const items=groups[count].sort((a,b)=>(a['ชื่อพิกัด']||'').localeCompare(b['ชื่อพิกัด']||'','th'));
-      const label=groupLabels[count]||`กลุ่ม ${count} ตัวยา`;
-
-      const groupEl=document.createElement('div');
-      groupEl.className='pikad-group';
-      groupEl.innerHTML=`<div class="pikad-group-title">
-        <span class="pikad-group-label">⚗️ ${label}</span>
-        <span class="pikad-group-badge">${items.length} พิกัด</span>
-      </div>
-      <div class="pikad-grid" id="pikadGroup_${count}"></div>`;
-      grid.appendChild(groupEl);
-
-      const groupGrid=groupEl.querySelector('.pikad-grid');
-      items.forEach((p,i)=>{
-        const col=BADGE[i%BADGE.length];
-        const ings=split(p['ตัวยา_ชื่อ']||p['ตัวยา_id']);
-        const uses=split(p['สรรพคุณรวม']).slice(0,3);
-        const card=document.createElement('div');
-        card.className='pikad-card';
-        card.onclick=()=>openPikadModal(p,col);
-        card.innerHTML=`
-          <div class="pikad-head">
-            <div class="pikad-badge" style="background:${col.bg};color:${col.t}">${p['จำนวนตัวยา']||'?'}</div>
-            <div><div class="pikad-name">${p['ชื่อพิกัด']||'—'}</div><div class="pikad-meaning">${p['ความหมาย']||''}</div></div>
-          </div>
-          <div class="pikad-ing-pills">${ings.map(s=>`<span class="pikad-ing">${s}</span>`).join('')}</div>
-          <p class="pikad-desc">${(p['วิธีเตรียม']||'').substring(0,90)}${(p['วิธีเตรียม']||'').length>90?'...':''}</p>
-          <div class="pikad-uses">${uses.map(u=>`<span class="pikad-use">${u}</span>`).join('')}</div>`;
-        groupGrid.appendChild(card);
-      });
-    });
-
     if(!pikadData.length)grid.innerHTML='<div class="no-data">ยังไม่มีข้อมูลพิกัดยาใน Google Sheet ครับ</div>';
     document.getElementById('statPikad').textContent=pikadData.length;
     document.getElementById('pikadCount').textContent=`${pikadData.length} พิกัด`;
