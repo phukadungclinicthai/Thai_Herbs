@@ -2292,7 +2292,12 @@ function loadDemoData(){
     {_row:2,รหัส:'msg001',วันที่:today,เวลา:'09:00',ชื่อลูกค้า:'สมหญิง รักสุขภาพ',เบอร์โทร:'0891234567',บริการ:'นวดแผนไทย',ชั่วโมง:'2',ราคา:'600',ส่วนที่เน้น:'หลัง, บ่า/ไหล่',อาการ:'ปวดหลังเรื้อรัง นั่งทำงานนานมาก',หมอนวด:'หมอนวดประจำคลินิก',สถานะ:'รอนวด'},
     {_row:3,รหัส:'msg002',วันที่:today,เวลา:'11:30',ชื่อลูกค้า:'มานะ ใจดี',เบอร์โทร:'0812345678',บริการ:'นวดเท้า-รีเฟล็กโซโลยี',ชั่วโมง:'1',ราคา:'250',ส่วนที่เน้น:'เท้า/ฝ่าเท้า',อาการ:'เท้าล้า ยืนนาน',หมอนวด:'หมอนวดประจำคลินิก',สถานะ:'นวดแล้ว'},
     {_row:4,รหัส:'msg003',วันที่:'2026-04-22',เวลา:'14:00',ชื่อลูกค้า:'วนิดา สบายดี',เบอร์โทร:'0823456789',บริการ:'ประคบสมุนไพร',ชั่วโมง:'1.5',ราคา:'525',ส่วนที่เน้น:'หลัง, ขา/น่อง',อาการ:'ปวดกล้ามเนื้อ อยากผ่อนคลาย',หมอนวด:'หมอนวดประจำคลินิก',สถานะ:'นวดแล้ว'},
-  ];
+  ].sort((a,b)=>{
+    const aWait=a['สถานะ']==='รอนวด', bWait=b['สถานะ']==='รอนวด';
+    if(aWait&&!bWait) return -1; if(!aWait&&bWait) return 1;
+    const da=(a['วันที่']||'')+' '+(a['เวลา']||''); const db=(b['วันที่']||'')+' '+(b['เวลา']||'');
+    return aWait ? da.localeCompare(db) : db.localeCompare(da);
+  });
   state.receipts=[
     {_row:2,เลขที่:'REC-2026-0001',วันที่:today,ชื่อลูกค้า:'มานะ ใจดี',บริการ:'นวดเท้า-รีเฟล็กโซโลยี 1 ชม.',ราคา:'250',ส่วนลด:'0',ยอดรวม:'250',ชำระโดย:'เงินสด',หมายเหตุ:''},
     {_row:3,เลขที่:'REC-2026-0002',วันที่:'2026-04-22',ชื่อลูกค้า:'วนิดา สบายดี',บริการ:'ประคบสมุนไพร 1.5 ชม.',ราคา:'525',ส่วนลด:'25',ยอดรวม:'500',ชำระโดย:'โอนเงิน',หมายเหตุ:'ลูกค้าประจำ'},
@@ -2368,7 +2373,14 @@ function toast(msg, type='info'){
 async function loadMassage(){
   try{
     const d=await sheetsGet(CONFIG.SHEET.massage+'!A:L');
-    state.massage=parseSheet(d.values||[]).sort((a,b)=>(b['วันที่']||'').localeCompare(a['วันที่']||''));
+    state.massage=parseSheet(d.values||[]).sort((a,b)=>{
+      const aWait=a['สถานะ']==='รอนวด', bWait=b['สถานะ']==='รอนวด';
+      if(aWait&&!bWait) return -1;
+      if(!aWait&&bWait) return 1;
+      const da=(a['วันที่']||'')+' '+(a['เวลา']||'');
+      const db=(b['วันที่']||'')+' '+(b['เวลา']||'');
+      return aWait ? da.localeCompare(db) : db.localeCompare(da);
+    });
   }catch(e){ state.massage=[]; }
   filtered.massage=[...state.massage];
   renderMassageTable();
@@ -2438,6 +2450,13 @@ function filterMassage(){
     const mS=!s||m['สถานะ']===s;
     const mD=!d||m['วันที่']===d;
     return mQ&&mS&&mD;
+  }).sort((a,b)=>{
+    const aWait=a['สถานะ']==='รอนวด', bWait=b['สถานะ']==='รอนวด';
+    if(aWait&&!bWait) return -1;
+    if(!aWait&&bWait) return 1;
+    const da=(a['วันที่']||'')+' '+(a['เวลา']||'');
+    const db=(b['วันที่']||'')+' '+(b['เวลา']||'');
+    return aWait ? da.localeCompare(db) : db.localeCompare(da);
   });
   renderMassageTable();
 }
