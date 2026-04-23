@@ -317,6 +317,15 @@ body{font-family:'Sarabun',sans-serif;background:#f0f4f1;color:var(--ink);min-he
           <span class="icon">⚙️</span> ตั้งค่าระบบ
         </div>
       </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">เชื่อมโยง</div>
+        <div class="nav-item" onclick="window.open('clinic.html','_blank')">
+          <span class="icon">🏥</span> ระบบคลินิก
+        </div>
+        <div class="nav-item" onclick="window.open('herbs.html','_blank')">
+          <span class="icon">🌐</span> เว็บความรู้
+        </div>
+      </div>
     </div>
 
     <!-- MAIN -->
@@ -861,7 +870,7 @@ async function loadAllData(){
 async function loadHerbsData(){
   try{
     const d = await sheetsGet(CONFIG.SHEET_NAMES.herbs+'!A:R');
-    state.herbs = parseSheet(d.values||[]).sort((a,b)=>(a['ชื่อไทย']||'').localeCompare(b['ชื่อไทย']||'','th'));
+    state.herbs = parseSheet(d.values||[]);
     herbsFiltered = [...state.herbs];
     renderHerbTable();
     updateBadge('herbBadge', state.herbs.length);
@@ -925,7 +934,7 @@ function loadDemoData(){
   state.refs = [
     {_row:2,id:'ref_001',ชื่อตำรา_งานวิจัย:'บัญชียาหลักแห่งชาติ',ปีพิมพ์:'2566',สถาบัน:'กระทรวงสาธารณสุข',ประเภท:'ตำรายา'},
   ];
-  herbsFiltered = [...state.herbs].sort((a,b)=>(a['ชื่อไทย']||'').localeCompare(b['ชื่อไทย']||'','th'));
+  herbsFiltered = [...state.herbs];
   renderHerbTable(); renderTasteTable(); renderPikadTable(); renderRefTable();
   updateDashboard();
   buildCatFilter();
@@ -983,39 +992,18 @@ function renderTasteTable(){
 function renderPikadTable(){
   const tbody = document.getElementById('pikadTableBody');
   if(!state.pikad.length){ tbody.innerHTML='<tr class="empty-row"><td colspan="5">ยังไม่มีข้อมูล</td></tr>'; return; }
-
-  // จัดกลุ่มตามจำนวนตัวยา
-  const groups = {};
-  state.pikad.forEach(p => {
-    const count = parseInt(p['จำนวนตัวยา'])||0;
-    if(!groups[count]) groups[count] = [];
-    groups[count].push(p);
-  });
-  // เรียงกลุ่มจากน้อยไปมาก แล้วภายในกลุ่มเรียงตามชื่อ
-  const sortedCounts = Object.keys(groups).map(Number).sort((a,b)=>a-b);
-  const groupLabels = {2:'กลุ่ม 2 (ทวิ)', 3:'กลุ่ม 3 (ตรี)', 4:'กลุ่ม 4 (จตุร)', 5:'กลุ่ม 5 (เบญจ)', 7:'กลุ่ม 7 (สัตต)', 8:'กลุ่ม 8 (อัฏฐ)', 9:'กลุ่ม 9 (นว)', 10:'กลุ่ม 10 (ทศ)'};
-
-  let html = '';
-  sortedCounts.forEach(count => {
-    const label = groupLabels[count] || `กลุ่ม ${count} ตัวยา`;
-    const items = groups[count].sort((a,b)=>(a['ชื่อพิกัด']||'').localeCompare(b['ชื่อพิกัด']||'','th'));
-    html += `<tr><td colspan="5" style="background:#e8f5e9;font-weight:700;color:#1a3a2a;padding:8px 12px;font-size:.9rem;border-top:2px solid #52b788;">⚗️ ${label}</td></tr>`;
-    items.forEach(p => {
-      html += `
-      <tr>
-        <td><div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--green-deep)">${p['ชื่อพิกัด']||'—'}</div>
-            <div style="font-size:.78rem;color:var(--muted)">${p['ความหมาย']||''}</div></td>
-        <td style="text-align:center;font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold)">${p['จำนวนตัวยา']||'?'}</td>
-        <td>${(p['ตัวยา_ชื่อ']||'').split(',').map(s=>`<span class="tag-pill">${s.trim()}</span>`).join('')}</td>
-        <td style="font-size:.82rem;color:var(--muted)">${(p['สรรพคุณรวม']||'').substring(0,50)}</td>
-        <td><div class="actions">
-          <button class="btn btn-secondary btn-sm" onclick="editPikad(${p._row})">✏️ แก้ไข</button>
-          <button class="btn btn-danger btn-sm" onclick="confirmDelete('pikad',${p._row},'${(p['ชื่อพิกัด']||'').replace(/'/g,"\\'")}')">🗑️</button>
-        </div></td>
-      </tr>`;
-    });
-  });
-  tbody.innerHTML = html;
+  tbody.innerHTML = state.pikad.map(p=>`
+    <tr>
+      <td><div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--green-deep)">${p['ชื่อพิกัด']||'—'}</div>
+          <div style="font-size:.78rem;color:var(--muted)">${p['ความหมาย']||''}</div></td>
+      <td style="text-align:center;font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold)">${p['จำนวนตัวยา']||'?'}</td>
+      <td>${(p['ตัวยา_ชื่อ']||'').split(',').map(s=>`<span class="tag-pill">${s.trim()}</span>`).join('')}</td>
+      <td style="font-size:.82rem;color:var(--muted)">${(p['สรรพคุณรวม']||'').substring(0,50)}</td>
+      <td><div class="actions">
+        <button class="btn btn-secondary btn-sm" onclick="editPikad(${p._row})">✏️ แก้ไข</button>
+        <button class="btn btn-danger btn-sm" onclick="confirmDelete('pikad',${p._row},'${(p['ชื่อพิกัด']||'').replace(/'/g,"\\'")}')">🗑️</button>
+      </div></td>
+    </tr>`).join('');
 }
 
 function renderRefTable(){
@@ -1045,7 +1033,7 @@ function filterHerbs(){
     const matchQ = !q || (h['ชื่อไทย']||'').includes(q) || (h['ชื่ออังกฤษ']||'').toLowerCase().includes(q);
     const matchCat = !cat || (h['หมวดสรรพคุณ']||'').includes(cat);
     return matchQ && matchCat;
-  }).sort((a,b)=>(a['ชื่อไทย']||'').localeCompare(b['ชื่อไทย']||'','th'));
+  });
   renderHerbTable();
 }
 function buildCatFilter(){
