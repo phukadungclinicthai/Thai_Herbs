@@ -1431,7 +1431,7 @@ function enterApp(){
   document.getElementById('userName').textContent = state.user.name;
   document.getElementById('dashDate').textContent = new Date().toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   // Set today's date defaults
-  const today = new Date().toISOString().split('T')[0];
+  let today = new Date().toISOString().split('T')[0];
   document.getElementById('fOpdDate').value = today;
   document.getElementById('apptDate').value = today;
   loadSettingsUI();
@@ -1524,7 +1524,7 @@ async function loadAppt(){
   }catch(e){ state.appt=[]; }
   filtered.appt=[...state.appt];
   renderApptTable();
-  const today=new Date().toISOString().split('T')[0];
+  let today=new Date().toISOString().split('T')[0];
   const todayAppt=state.appt.filter(a=>a['วันนัด']===today&&a['สถานะ']!=='ยกเลิก').length;
   updateBadge('apptBadge',todayAppt);
   document.getElementById('apptPageSub').textContent=`ทั้งหมด ${state.appt.length} นัด`;
@@ -1545,7 +1545,7 @@ async function loadFormulas(){
 // ═══════════════════════════════════════════════
 function updateDashboard(){
   document.getElementById('dash-patients').textContent=state.patients.length;
-  const today=new Date().toISOString().split('T')[0];
+  let today=new Date().toISOString().split('T')[0];
   const todayAppt=state.appt.filter(a=>a['วันนัด']===today&&a['สถานะ']!=='ยกเลิก');
   document.getElementById('dash-today-appt').textContent=todayAppt.length;
   const curMonth=new Date().toISOString().substring(0,7);
@@ -1880,7 +1880,7 @@ function renderCalendar(){
   });
   const first=new Date(calYear,calMonth,1);
   const last=new Date(calYear,calMonth+1,0);
-  const today=new Date().toISOString().split('T')[0];
+  let today=new Date().toISOString().split('T')[0];
   for(let i=0;i<first.getDay();i++){
     const d=document.createElement('div');d.className='cal-day other-month';grid.appendChild(d);
   }
@@ -2123,7 +2123,7 @@ function loadDemoData(){
     {_row:3,รหัสคนไข้:'6c31f96f',ชื่อ_นามสกุล:'รวิวรรณ พันสนิท',เลขบัตรประชาชน:'3421000006655',วันเดือนปีเกิด:'1969-11-04',อายุ:'56',เพศ:'หญิง',ที่อยู่:'',เบอร์โทรศัพท์:'0814805793',ธาตุเจ้าเรือนหลัก:'ธาตุน้ำ (อาโป)',ธาตุเจ้าเรือนรอง:'ธาตุลม (วาโย)',โรคประจำตัว:'',ประวัติการแพ้ยา:''},
     {_row:4,รหัสคนไข้:'a1b2c3d4',ชื่อ_นามสกุล:'สมชาย ใจดี',เลขบัตรประชาชน:'1234567890123',วันเดือนปีเกิด:'1975-06-15',อายุ:'50',เพศ:'ชาย',ที่อยู่:'ภูกระดึง เลย',เบอร์โทรศัพท์:'0891234567',ธาตุเจ้าเรือนหลัก:'ธาตุไฟ (เตโช)',ธาตุเจ้าเรือนรอง:'ธาตุดิน (ปฐวี)',โรคประจำตัว:'ความดันโลหิตสูง',ประวัติการแพ้ยา:'ไม่มี'},
   ];
-  const today=new Date().toISOString().split('T')[0];
+  let today=new Date().toISOString().split('T')[0];
   state.opd=[
     {_row:2,รหัสการตรวจ:'4f7c266c',รหัสคนไข้:'020ef2c3',วันที่ตรวจ:today,ความดัน:'130/85',ชีพจร:'78',น้ำหนัก:'72',อุณหภูมิ:'36.8',อาการสำคัญ:'ชาตามปลายมือและปลายเท้า ปวดข้อนิ้วเท้า',การวินิจฉัย:'ธาตุดินพิการ เส้นเอ็นอักเสบ',แนวทางการรักษา:'ยาแก้เส้นเอ็น นวดผ่อนคลาย',รายการยาที่สั่ง:'ยาห้าราก 1 ซอง วันละ 2 เวลา\nยาไพล 1 ขวด ทาเฉพาะที่',หมายเหตุ_ของแสลง:'หลีกเลี่ยงอาหารรสจัด ของหมักดอง',สถานะการพิมพ์:'รอพิมพ์'},
     {_row:3,รหัสการตรวจ:'b2c3d4e5',รหัสคนไข้:'6c31f96f',วันที่ตรวจ:'2026-04-15',ความดัน:'120/80',ชีพจร:'72',น้ำหนัก:'58',อุณหภูมิ:'36.5',อาการสำคัญ:'ไอมีเสมหะ เหนื่อยง่าย แน่นหน้าอก',การวินิจฉัย:'ธาตุน้ำพิการ เสมหะเป็นพิษ',แนวทางการรักษา:'ยาขับเสมหะ บำรุงธาตุน้ำ',รายการยาที่สั่ง:'ยาประสะมะแว้ง 2 ซอง วันละ 3 เวลา\nยาฟ้าทลายโจร 1 ซอง',หมายเหตุ_ของแสลง:'งดของเย็น ของทอด',สถานะการพิมพ์:'พิมพ์เสร็จแล้ว'},
@@ -2144,7 +2144,6 @@ function loadDemoData(){
     {_row:3,ชื่อตำรับยา:'ยาห้าราก',ประเภทยา:'ยาต้ม',กลุ่มอาการ:'กลุ่มแก้ปวดเมื่อย',ส่วนประกอบ:'รากชิงชี่ 30 กรัม\nรากมะเดื่อ 30 กรัม\nรากคนทา 30 กรัม\nรากมะกรูด 30 กรัม\nรากเท้ายายม่อม 30 กรัม',วิธีปรุง:'ต้มน้ำ 3 ส่วน เคี่ยวเหลือ 1 ส่วน',สรรพคุณ:'แก้เส้นเอ็น บำรุงกระดูก แก้ปวดเมื่อย',วิธีใช้และขนาดยา:'ดื่มครั้งละ 1 แก้ว วันละ 2-3 เวลา',ข้อควรระวัง:'ระวังในผู้ป่วยโรคไต',แหล่งที่มา:'ตำราหมอฉลอง',สถานะ:'ใช้งาน',หมายเหตุ:''},
   ];
   state.services=getDefaultServices();
-  const today=new Date().toISOString().split('T')[0];
   state.massage=[
     {_row:2,รหัส:'msg001',วันที่:today,เวลา:'09:00',ชื่อลูกค้า:'สมหญิง รักสุขภาพ',เบอร์โทร:'0891234567',บริการ:'นวดแผนไทย',ชั่วโมง:'2',ราคา:'600',ส่วนที่เน้น:'หลัง, บ่า/ไหล่',อาการ:'ปวดหลังเรื้อรัง นั่งทำงานนานมาก',หมอนวด:'หมอนวดประจำคลินิก',สถานะ:'รอนวด'},
     {_row:3,รหัส:'msg002',วันที่:today,เวลา:'11:30',ชื่อลูกค้า:'มานะ ใจดี',เบอร์โทร:'0812345678',บริการ:'นวดเท้า-รีเฟล็กโซโลยี',ชั่วโมง:'1',ราคา:'250',ส่วนที่เน้น:'เท้า/ฝ่าเท้า',อาการ:'เท้าล้า ยืนนาน',หมอนวด:'หมอนวดประจำคลินิก',สถานะ:'นวดแล้ว'},
@@ -2221,7 +2220,7 @@ async function loadMassage(){
   }catch(e){ state.massage=[]; }
   filtered.massage=[...state.massage];
   renderMassageTable();
-  const today=new Date().toISOString().split('T')[0];
+  let today=new Date().toISOString().split('T')[0];
   const todayM=state.massage.filter(m=>m['วันที่']===today&&m['สถานะ']!=='ยกเลิก').length;
   updateBadge('massageBadge',todayM);
   document.getElementById('massagePageSub').textContent=`ทั้งหมด ${state.massage.length} นัด`;
@@ -2243,7 +2242,7 @@ async function loadReceipts(){
   filtered.receipts=[...state.receipts];
   renderReceiptTable();
   updateRevenueStats();
-  const today=new Date().toISOString().split('T')[0];
+  let today=new Date().toISOString().split('T')[0];
   document.getElementById('fReceiptDate').value=today;
 }
 function getDefaultServices(){
@@ -2345,7 +2344,7 @@ function filterReceipts(){
   updateRevenueStats();
 }
 function updateRevenueStats(){
-  const today=new Date().toISOString().split('T')[0];
+  let today=new Date().toISOString().split('T')[0];
   const curM=new Date().toISOString().substring(0,7);
   const todayRev=state.receipts.filter(r=>r['วันที่']===today).reduce((s,r)=>s+Number(r['ยอดรวม']||0),0);
   const monthRev=state.receipts.filter(r=>r['วันที่']?.startsWith(curM)).reduce((s,r)=>s+Number(r['ยอดรวม']||0),0);
