@@ -212,7 +212,21 @@ body{font-family:'Sarabun',sans-serif;background:#f0f4f1;color:var(--ink);min-he
 .formula-prop{font-size:.75rem;color:var(--muted)}
 .formula-prop strong{color:var(--ink);font-size:.8rem}
 
-/* ── ANIMATIONS ── */
+/* ── MASSAGE ── */
+.service-card{background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:1rem;transition:all .2s}
+.service-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateY(-1px)}
+.service-head{padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;border-bottom:1px solid var(--border)}
+.service-name{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--green-deep)}
+.service-price{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--gold);font-weight:700}
+.service-body{padding:.85rem 1.5rem;display:flex;gap:1.5rem;flex-wrap:wrap;font-size:.83rem;color:var(--muted)}
+.service-badge-available{background:#e8f5e9;color:#2e7d32;padding:.2rem .75rem;border-radius:20px;font-size:.72rem;font-weight:700}
+.service-badge-unavailable{background:#fce4ec;color:#880e4f;padding:.2rem .75rem;border-radius:20px;font-size:.72rem;font-weight:700}
+.receipt-card{background:white;border-radius:14px;border:1px solid var(--border);padding:1.5rem;margin-bottom:1rem}
+.receipt-total{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--gold)}
+.body-map{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin:.75rem 0}
+.body-part{padding:.4rem .6rem;border-radius:8px;border:1.5px solid var(--border);font-size:.78rem;cursor:pointer;text-align:center;transition:all .2s;user-select:none}
+.body-part.selected{border-color:var(--green-mid);background:#e8f5e9;color:var(--green-mid);font-weight:700}
+.body-part:hover{border-color:var(--green-light)}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes popIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
 @keyframes slideInRight{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
@@ -302,6 +316,19 @@ body{font-family:'Sarabun',sans-serif;background:#f0f4f1;color:var(--ink);min-he
         </div>
       </div>
       <div class="sidebar-section">
+        <div class="sidebar-label">นวดแผนโบราณ</div>
+        <div class="nav-item" onclick="showPage('massage',this)">
+          <span class="icon">💆</span> นัดหมายนวด
+          <span class="nav-badge blue" id="massageBadge">—</span>
+        </div>
+        <div class="nav-item" onclick="showPage('massageServices',this)">
+          <span class="icon">🛎️</span> บริการ / ราคา
+        </div>
+        <div class="nav-item" onclick="showPage('massageReceipt',this)">
+          <span class="icon">🧾</span> ใบเสร็จ / รายได้
+        </div>
+      </div>
+      <div class="sidebar-section">
         <div class="sidebar-label">ระบบ</div>
         <div class="nav-item" onclick="showPage('settings',this)">
           <span class="icon">⚙️</span> ตั้งค่า
@@ -351,6 +378,16 @@ body{font-family:'Sarabun',sans-serif;background:#f0f4f1;color:var(--ink);min-he
             <div class="stat-card-icon">📜</div>
             <div class="stat-card-num" id="dash-formulas">—</div>
             <div class="stat-card-label">ตำรับยา</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon">💆</div>
+            <div class="stat-card-num" id="dash-massage-today">—</div>
+            <div class="stat-card-label">นวดวันนี้</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon">💰</div>
+            <div class="stat-card-num" id="dash-revenue-month">—</div>
+            <div class="stat-card-label">รายได้เดือนนี้ (บาท)</div>
           </div>
         </div>
 
@@ -571,6 +608,88 @@ body{font-family:'Sarabun',sans-serif;background:#f0f4f1;color:var(--ink);min-he
               <label class="form-label">เลขที่ใบอนุญาต</label>
               <input class="form-input" id="settingLicense" placeholder="เลขที่ใบประกอบวิชาชีพ">
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ MASSAGE APPOINTMENTS ══ -->
+      <div class="page" id="page-massage">
+        <div class="page-header">
+          <div>
+            <div class="page-title">นัดหมายนวดแผนโบราณ</div>
+            <div class="page-subtitle" id="massagePageSub">—</div>
+          </div>
+          <button class="btn btn-primary" onclick="openMassageDrawer()">＋ เพิ่มนัดนวด</button>
+        </div>
+        <div class="table-card">
+          <div class="table-toolbar">
+            <div class="search-box"><input type="text" id="massageSearch" placeholder="ค้นหาชื่อลูกค้า..." oninput="filterMassage()"></div>
+            <select class="form-select" style="width:auto;padding:.5rem .8rem" id="massageStatusFilter" onchange="filterMassage()">
+              <option value="">ทุกสถานะ</option>
+              <option>รอนวด</option><option>นวดแล้ว</option><option>ยกเลิก</option>
+            </select>
+            <input type="date" class="form-input" id="massageDateFilter" style="width:auto" onchange="filterMassage()">
+          </div>
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead><tr><th>วัน/เวลา</th><th>ลูกค้า</th><th>บริการ</th><th>ส่วนที่เน้น</th><th>ชั่วโมง</th><th>ราคา</th><th>หมอนวด</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+              <tbody id="massageTableBody"><tr class="loading-row"><td colspan="9">⏳ กำลังโหลด...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ MASSAGE SERVICES ══ -->
+      <div class="page" id="page-massageServices">
+        <div class="page-header">
+          <div>
+            <div class="page-title">บริการนวด / ราคา</div>
+            <div class="page-subtitle">จัดการรายการบริการและอัตราค่านวด</div>
+          </div>
+          <button class="btn btn-primary" onclick="openServiceDrawer()">＋ เพิ่มบริการ</button>
+        </div>
+        <div id="serviceGrid">
+          <div class="loading-row" style="text-align:center;padding:3rem;color:var(--muted)">⏳ กำลังโหลด...</div>
+        </div>
+      </div>
+
+      <!-- ══ MASSAGE RECEIPT ══ -->
+      <div class="page" id="page-massageReceipt">
+        <div class="page-header">
+          <div>
+            <div class="page-title">ใบเสร็จ / รายได้</div>
+            <div class="page-subtitle" id="receiptPageSub">—</div>
+          </div>
+          <button class="btn btn-primary" onclick="openReceiptDrawer()">＋ ออกใบเสร็จ</button>
+        </div>
+        <!-- สรุปรายได้ -->
+        <div class="stats-row" style="margin-bottom:1.5rem">
+          <div class="stat-card">
+            <div class="stat-card-icon">💰</div>
+            <div class="stat-card-num" id="rev-today">—</div>
+            <div class="stat-card-label">รายได้วันนี้ (บาท)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon">📅</div>
+            <div class="stat-card-num" id="rev-month">—</div>
+            <div class="stat-card-label">รายได้เดือนนี้ (บาท)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon">🧾</div>
+            <div class="stat-card-num" id="rev-count">—</div>
+            <div class="stat-card-label">ใบเสร็จเดือนนี้</div>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="table-toolbar">
+            <div class="search-box"><input type="text" id="receiptSearch" placeholder="ค้นหา..." oninput="filterReceipts()"></div>
+            <input type="month" class="form-input" id="receiptMonth" style="width:auto" onchange="filterReceipts()">
+          </div>
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead><tr><th>เลขที่</th><th>วันที่</th><th>ลูกค้า</th><th>บริการ</th><th>ราคา</th><th>ชำระโดย</th><th>จัดการ</th></tr></thead>
+              <tbody id="receiptTableBody"><tr class="loading-row"><td colspan="7">⏳ กำลังโหลด...</td></tr></tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -974,6 +1093,207 @@ body{font-family:'Sarabun',sans-serif;background:#f0f4f1;color:var(--ink);min-he
   </div>
 </div>
 
+<!-- Massage Appointment Drawer -->
+<div class="drawer-overlay" id="massageDrawerOverlay" onclick="closeMassageDrawer()"></div>
+<div class="drawer" id="massageDrawer">
+  <div class="drawer-header">
+    <div class="drawer-title" id="massageDrawerTitle">＋ เพิ่มนัดนวด</div>
+    <button class="drawer-close" onclick="closeMassageDrawer()">✕</button>
+  </div>
+  <div class="drawer-body">
+    <input type="hidden" id="massageEditRow">
+    <div class="form-grid">
+      <div class="form-group span2">
+        <label class="form-label">ชื่อลูกค้า <span class="req">*</span></label>
+        <input class="form-input" id="fMassageName" placeholder="ชื่อ-นามสกุล">
+      </div>
+      <div class="form-group">
+        <label class="form-label">เบอร์โทร</label>
+        <input class="form-input" id="fMassagePhone" placeholder="08x-xxx-xxxx" type="tel">
+      </div>
+      <div class="form-group">
+        <label class="form-label">วันที่ <span class="req">*</span></label>
+        <input class="form-input" type="date" id="fMassageDate">
+      </div>
+      <div class="form-group">
+        <label class="form-label">เวลา</label>
+        <input class="form-input" type="time" id="fMassageTime" value="09:00">
+      </div>
+      <div class="form-group span2">
+        <label class="form-label">รูปแบบการนวด <span class="req">*</span></label>
+        <select class="form-select" id="fMassageService" onchange="updateMassagePrice()">
+          <option value="">— เลือกบริการ —</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ระยะเวลา (ชั่วโมง)</label>
+        <select class="form-select" id="fMassageHours" onchange="updateMassagePrice()">
+          <option value="1">1 ชั่วโมง</option>
+          <option value="1.5">1.5 ชั่วโมง</option>
+          <option value="2">2 ชั่วโมง</option>
+          <option value="2.5">2.5 ชั่วโมง</option>
+          <option value="3">3 ชั่วโมง</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ราคา (บาท)</label>
+        <input class="form-input" id="fMassagePrice" type="number" placeholder="0" style="background:#f8faf9">
+      </div>
+      <div class="form-group span2">
+        <label class="form-label">ส่วนที่ต้องการเน้น</label>
+        <div class="body-map" id="bodyMap">
+          <div class="body-part" onclick="toggleBodyPart(this)">🦶 เท้า/ฝ่าเท้า</div>
+          <div class="body-part" onclick="toggleBodyPart(this)">🦵 ขา/น่อง</div>
+          <div class="body-part" onclick="toggleBodyPart(this)">🍑 สะโพก/ต้นขา</div>
+          <div class="body-part" onclick="toggleBodyPart(this)">🫁 หลัง</div>
+          <div class="body-part" onclick="toggleBodyPart(this)">💪 บ่า/ไหล่</div>
+          <div class="body-part" onclick="toggleBodyPart(this)">🤲 แขน/มือ</div>
+          <div class="body-part" onclick="toggleBodyPart(this)">🫀 หน้าอก/ท้อง</div>
+          <div class="body-part" onclick="toggleBodyPart(this)">🧠 ศีรษะ/คอ</div>
+          <div class="body-part" onclick="toggleBodyPart(this)">👁️ ใบหน้า</div>
+        </div>
+      </div>
+      <div class="form-group span2">
+        <label class="form-label">อาการ/ความต้องการพิเศษ</label>
+        <textarea class="form-textarea" id="fMassageNote" placeholder="เช่น ปวดหลังเรื้อรัง, ต้องการผ่อนคลาย, แพ้น้ำมันบางชนิด"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">หมอนวด</label>
+        <input class="form-input" id="fMassageTherapist" value="หมอนวดประจำคลินิก" placeholder="ชื่อหมอนวด">
+      </div>
+      <div class="form-group">
+        <label class="form-label">สถานะ</label>
+        <select class="form-select" id="fMassageStatus">
+          <option>รอนวด</option><option>นวดแล้ว</option><option>ยกเลิก</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <button class="btn btn-secondary" onclick="closeMassageDrawer()">ยกเลิก</button>
+    <button class="btn btn-gold" onclick="saveMassageAndReceipt()">💾 บันทึก + ออกใบเสร็จ</button>
+    <button class="btn btn-primary" onclick="saveMassage()">💾 บันทึก</button>
+  </div>
+</div>
+
+<!-- Service Drawer -->
+<div class="drawer-overlay" id="serviceDrawerOverlay" onclick="closeServiceDrawer()"></div>
+<div class="drawer" id="serviceDrawer">
+  <div class="drawer-header">
+    <div class="drawer-title" id="serviceDrawerTitle">＋ เพิ่มบริการนวด</div>
+    <button class="drawer-close" onclick="closeServiceDrawer()">✕</button>
+  </div>
+  <div class="drawer-body">
+    <input type="hidden" id="serviceEditRow">
+    <div class="form-grid">
+      <div class="form-group span2">
+        <label class="form-label">ชื่อบริการ <span class="req">*</span></label>
+        <input class="form-input" id="fServiceName" placeholder="เช่น นวดแผนไทย, นวดน้ำมัน, ประคบสมุนไพร">
+      </div>
+      <div class="form-group span2">
+        <label class="form-label">คำอธิบาย</label>
+        <textarea class="form-textarea" id="fServiceDesc" placeholder="รายละเอียดบริการ เทคนิคที่ใช้ ผลที่ได้รับ"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ราคาต่อชั่วโมง (บาท) <span class="req">*</span></label>
+        <input class="form-input" type="number" id="fServicePrice" placeholder="300">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ระยะเวลาขั้นต่ำ</label>
+        <select class="form-select" id="fServiceMinHours">
+          <option value="1">1 ชั่วโมง</option>
+          <option value="1.5">1.5 ชั่วโมง</option>
+          <option value="2">2 ชั่วโมง</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">หมวดหมู่</label>
+        <select class="form-select" id="fServiceCat">
+          <option>นวดแผนไทย</option>
+          <option>นวดน้ำมัน</option>
+          <option>ประคบสมุนไพร</option>
+          <option>นวดเท้า</option>
+          <option>นวดหน้า/ศีรษะ</option>
+          <option>บำบัดพิเศษ</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">สถานะบริการ</label>
+        <select class="form-select" id="fServiceStatus">
+          <option>เปิดให้บริการ</option>
+          <option>ยังไม่เปิดบริการ</option>
+          <option>ปิดชั่วคราว</option>
+        </select>
+      </div>
+      <div class="form-group span2">
+        <label class="form-label">หมายเหตุ (เหตุผลที่ยังไม่เปิดบริการ)</label>
+        <input class="form-input" id="fServiceNote" placeholder="เช่น รอหมอนวดที่ผ่านการอบรม">
+      </div>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <button class="btn btn-secondary" onclick="closeServiceDrawer()">ยกเลิก</button>
+    <button class="btn btn-primary" onclick="saveService()">💾 บันทึก</button>
+  </div>
+</div>
+
+<!-- Receipt Drawer -->
+<div class="drawer-overlay" id="receiptDrawerOverlay" onclick="closeReceiptDrawer()"></div>
+<div class="drawer" id="receiptDrawer">
+  <div class="drawer-header">
+    <div class="drawer-title" id="receiptDrawerTitle">🧾 ออกใบเสร็จ</div>
+    <button class="drawer-close" onclick="closeReceiptDrawer()">✕</button>
+  </div>
+  <div class="drawer-body">
+    <input type="hidden" id="receiptEditRow">
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">เลขที่ใบเสร็จ</label>
+        <input class="form-input" id="fReceiptNo" readonly style="background:#f8faf9;color:var(--muted)">
+      </div>
+      <div class="form-group">
+        <label class="form-label">วันที่ <span class="req">*</span></label>
+        <input class="form-input" type="date" id="fReceiptDate">
+      </div>
+      <div class="form-group span2">
+        <label class="form-label">ชื่อลูกค้า <span class="req">*</span></label>
+        <input class="form-input" id="fReceiptName" placeholder="ชื่อ-นามสกุล">
+      </div>
+      <div class="form-group span2">
+        <label class="form-label">บริการ <span class="req">*</span></label>
+        <input class="form-input" id="fReceiptService" placeholder="เช่น นวดแผนไทย 2 ชั่วโมง">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ราคา (บาท) <span class="req">*</span></label>
+        <input class="form-input" type="number" id="fReceiptAmount" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ส่วนลด (บาท)</label>
+        <input class="form-input" type="number" id="fReceiptDiscount" placeholder="0" value="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ยอดรวมสุทธิ</label>
+        <input class="form-input" id="fReceiptTotal" readonly style="background:#f8faf9;font-weight:700;color:var(--gold)">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ชำระโดย</label>
+        <select class="form-select" id="fReceiptPayment">
+          <option>เงินสด</option><option>โอนเงิน</option><option>QR Code</option>
+        </select>
+      </div>
+      <div class="form-group span2">
+        <label class="form-label">หมายเหตุ</label>
+        <textarea class="form-textarea" id="fReceiptNote" rows="2"></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <button class="btn btn-secondary" onclick="closeReceiptDrawer()">ยกเลิก</button>
+    <button class="btn btn-gold" onclick="printReceipt()">🖨️ พิมพ์ใบเสร็จ</button>
+    <button class="btn btn-primary" onclick="saveReceipt()">💾 บันทึก</button>
+  </div>
+</div>
+
 <!-- Confirm Dialog -->
 <div class="confirm-overlay" id="confirmOverlay">
   <div class="confirm-box">
@@ -998,7 +1318,7 @@ body{font-family:'Sarabun',sans-serif;background:#f0f4f1;color:var(--ink);min-he
 // CONFIG
 // ═══════════════════════════════════════════════
 const CONFIG = {
-  CLIENT_ID: '',
+  CLIENT_ID: '909631868562-7pis3hknhjvjf026161ncpbcgifg6jbl.apps.googleusercontent.com',
   SPREADSHEET_ID: '1KhF_oXka6ddVJynUecpsLgNCP-RUOOMnNsjnyk8xGX8',
   SCOPES: 'https://www.googleapis.com/auth/spreadsheets',
   SHEET: {
@@ -1006,7 +1326,10 @@ const CONFIG = {
     opd:      'บันทึกการรักษา',
     stock:    'คลังยาสมุนไพร',
     appt:     'นัดหมาย',
-    formulas: 'ตำรับยา'
+    formulas: 'ตำรับยา',
+    massage:  'นัดหมายนวด',
+    services: 'บริการนวด',
+    receipts: 'ใบเสร็จ'
   }
 };
 
@@ -1015,9 +1338,10 @@ const CONFIG = {
 // ═══════════════════════════════════════════════
 let state = {
   user: null, tokenClient: null, accessToken: null, demo: false,
-  patients: [], opd: [], stock: [], appt: [], formulas: []
+  patients: [], opd: [], stock: [], appt: [], formulas: [],
+  massage: [], services: [], receipts: []
 };
-let filtered = { patients:[], opd:[], stock:[], appt:[], formulas:[] };
+let filtered = { patients:[], opd:[], stock:[], appt:[], formulas:[], massage:[], receipts:[] };
 let confirmCallback = null;
 let calYear = new Date().getFullYear();
 let calMonth = new Date().getMonth();
@@ -1073,7 +1397,7 @@ function loadSettingsUI(){
 function signInWithGoogle(){
   if(!window.google){ toast('กำลังโหลด Google API...','info'); return; }
   state.tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: CONFIG.CLIENT_ID || prompt('กรุณาใส่ Google Client ID:',''),
+    client_id: CONFIG.CLIENT_ID,
     scope: CONFIG.SCOPES,
     callback: async(resp) => {
       if(resp.error){ toast('ขอสิทธิ์ไม่สำเร็จ','error'); return; }
@@ -1162,7 +1486,7 @@ function parseSheet(rows){
 async function loadAllData(){
   setProgress(10);
   try{
-    await Promise.all([loadPatients(),loadOpd(),loadStock(),loadAppt(),loadFormulas()]);
+    await Promise.all([loadPatients(),loadOpd(),loadStock(),loadAppt(),loadFormulas(),loadMassage(),loadServices(),loadReceipts()]);
     setProgress(100);
     updateDashboard();
   }catch(e){ toast('โหลดข้อมูลบางส่วนไม่สำเร็จ: '+e.message,'error'); setProgress(100); }
@@ -1816,29 +2140,38 @@ function loadDemoData(){
     {_row:5,รหัสยา:'med004',ชื่อตำรับยา:'ไพล',ชื่อวิทยาศาสตร์:'Zingiber cassumunar',ชื่อท้องถิ่น:'ปูเลย',รสยาหลัก:'รสเผ็ดร้อน',ส่วนที่ใช้:'เหง้า/หัว',สรรพคุณ:'แก้ปวดกล้ามเนื้อ ลดอักเสบ',กลุ่มสรรพคุณ:'กลุ่มแก้ปวดเมื่อย',จำนวนคงเหลือ:'3',หน่วยนับ:'ขวด',แหล่งที่มา:'ปลูกเอง',จำนวนขั้นต่ำ:'5'},
   ];
   state.formulas=[
-    {_row:2,ชื่อตำรับยา:'ยาตรีผลา',ประเภทยา:'ยาผง',กลุ่มอาการ:'กลุ่มบำรุงธาตุ',ส่วนประกอบ:'สมอไทย 10 กรัม\nสมอพิเภก 10 กรัม\nมะขามป้อม 10 กรัม',วิธีปรุง:'บดผสมในอัตราส่วนเท่ากัน ร่อนให้ละเอียด',สรรพคุณ:'บำรุงร่างกาย,ล้างพิษ,ระบายอ่อนๆ',วิธีใช้และขนาดยา:'ผงยา 1-2 กรัม ผสมน้ำผึ้ง รับประทานก่อนนอน',ข้อควรระวัง:'ระวังในหญิงตั้งครรภ์ ไม่ควรรับประทานติดต่อกันนาน',แหล่งที่มา:'ตำราหมอฉลอง',สถานะ:'ใช้งาน',หมายเหตุ:'สูตรดั้งเดิมของอาจารย์ ใช้ได้ผลดีกับคนไข้ธาตุดิน'},
+    {_row:2,ชื่อตำรับยา:'ยาตรีผลา',ประเภทยา:'ยาผง',กลุ่มอาการ:'กลุ่มบำรุงธาตุ',ส่วนประกอบ:'สมอไทย 10 กรัม\nสมอพิเภก 10 กรัม\nมะขามป้อม 10 กรัม',วิธีปรุง:'บดผสมในอัตราส่วนเท่ากัน ร่อนให้ละเอียด',สรรพคุณ:'บำรุงร่างกาย,ล้างพิษ,ระบายอ่อนๆ',วิธีใช้และขนาดยา:'ผงยา 1-2 กรัม ผสมน้ำผึ้ง รับประทานก่อนนอน',ข้อควรระวัง:'ระวังในหญิงตั้งครรภ์',แหล่งที่มา:'ตำราหมอฉลอง',สถานะ:'ใช้งาน',หมายเหตุ:'สูตรดั้งเดิมของอาจารย์'},
     {_row:3,ชื่อตำรับยา:'ยาห้าราก',ประเภทยา:'ยาต้ม',กลุ่มอาการ:'กลุ่มแก้ปวดเมื่อย',ส่วนประกอบ:'รากชิงชี่ 30 กรัม\nรากมะเดื่อ 30 กรัม\nรากคนทา 30 กรัม\nรากมะกรูด 30 กรัม\nรากเท้ายายม่อม 30 กรัม',วิธีปรุง:'ต้มน้ำ 3 ส่วน เคี่ยวเหลือ 1 ส่วน',สรรพคุณ:'แก้เส้นเอ็น บำรุงกระดูก แก้ปวดเมื่อย',วิธีใช้และขนาดยา:'ดื่มครั้งละ 1 แก้ว วันละ 2-3 เวลา',ข้อควรระวัง:'ระวังในผู้ป่วยโรคไต',แหล่งที่มา:'ตำราหมอฉลอง',สถานะ:'ใช้งาน',หมายเหตุ:''},
-    {_row:4,ชื่อตำรับยา:'ยาประสะมะแว้ง',ประเภทยา:'ยาผง',กลุ่มอาการ:'กลุ่มแก้ไอ ขับเสมหะ',ส่วนประกอบ:'มะแว้งต้น 5 กรัม\nมะแว้งเครือ 5 กรัม\nดีปลี 2 กรัม\nพริกไทย 2 กรัม\nขิงแห้ง 2 กรัม',วิธีปรุง:'บดรวมกันให้เป็นผง',สรรพคุณ:'แก้ไอ ขับเสมหะ บรรเทาอาการหวัด',วิธีใช้และขนาดยา:'ผงยา 1 กรัม ผสมน้ำผึ้ง รับประทานวันละ 3 เวลา',ข้อควรระวัง:'ระวังในผู้ที่แพ้พริก',แหล่งที่มา:'บัญชียาหลักแห่งชาติ',สถานะ:'ใช้งาน',หมายเหตุ:''},
   ];
-  filtered={patients:[...state.patients],opd:[...state.opd],stock:[...state.stock],appt:[...state.appt],formulas:[...state.formulas]};
-  renderPatientTable();
-  renderOpdTable();
-  renderStockTable();
-  renderApptTable();
-  renderFormulaGrid();
-  populatePatientSelects();
+  state.services=getDefaultServices();
+  const today=new Date().toISOString().split('T')[0];
+  state.massage=[
+    {_row:2,รหัส:'msg001',วันที่:today,เวลา:'09:00',ชื่อลูกค้า:'สมหญิง รักสุขภาพ',เบอร์โทร:'0891234567',บริการ:'นวดแผนไทย',ชั่วโมง:'2',ราคา:'600',ส่วนที่เน้น:'หลัง, บ่า/ไหล่',อาการ:'ปวดหลังเรื้อรัง นั่งทำงานนานมาก',หมอนวด:'หมอนวดประจำคลินิก',สถานะ:'รอนวด'},
+    {_row:3,รหัส:'msg002',วันที่:today,เวลา:'11:30',ชื่อลูกค้า:'มานะ ใจดี',เบอร์โทร:'0812345678',บริการ:'นวดเท้า-รีเฟล็กโซโลยี',ชั่วโมง:'1',ราคา:'250',ส่วนที่เน้น:'เท้า/ฝ่าเท้า',อาการ:'เท้าล้า ยืนนาน',หมอนวด:'หมอนวดประจำคลินิก',สถานะ:'นวดแล้ว'},
+    {_row:4,รหัส:'msg003',วันที่:'2026-04-22',เวลา:'14:00',ชื่อลูกค้า:'วนิดา สบายดี',เบอร์โทร:'0823456789',บริการ:'ประคบสมุนไพร',ชั่วโมง:'1.5',ราคา:'525',ส่วนที่เน้น:'หลัง, ขา/น่อง',อาการ:'ปวดกล้ามเนื้อ อยากผ่อนคลาย',หมอนวด:'หมอนวดประจำคลินิก',สถานะ:'นวดแล้ว'},
+  ];
+  state.receipts=[
+    {_row:2,เลขที่:'REC-2026-0001',วันที่:today,ชื่อลูกค้า:'มานะ ใจดี',บริการ:'นวดเท้า-รีเฟล็กโซโลยี 1 ชม.',ราคา:'250',ส่วนลด:'0',ยอดรวม:'250',ชำระโดย:'เงินสด',หมายเหตุ:''},
+    {_row:3,เลขที่:'REC-2026-0002',วันที่:'2026-04-22',ชื่อลูกค้า:'วนิดา สบายดี',บริการ:'ประคบสมุนไพร 1.5 ชม.',ราคา:'525',ส่วนลด:'25',ยอดรวม:'500',ชำระโดย:'โอนเงิน',หมายเหตุ:'ลูกค้าประจำ'},
+  ];
+  filtered={patients:[...state.patients],opd:[...state.opd],stock:[...state.stock],appt:[...state.appt],formulas:[...state.formulas],massage:[...state.massage],receipts:[...state.receipts]};
+  renderPatientTable(); renderOpdTable(); renderStockTable();
+  renderApptTable(); renderFormulaGrid();
+  renderMassageTable(); renderServiceGrid(); renderReceiptTable();
+  populatePatientSelects(); populateServiceSelect();
   updateBadge('patientBadge',state.patients.length);
   updateBadge('opdBadge',state.opd.length);
   updateBadge('stockBadge',state.stock.length);
   updateBadge('formulaBadge',state.formulas.length);
-  const todayAppt=state.appt.filter(a=>a['วันนัด']===new Date().toISOString().split('T')[0]).length;
-  updateBadge('apptBadge',todayAppt);
+  updateBadge('massageBadge',state.massage.filter(m=>m['วันที่']===today).length);
+  updateBadge('apptBadge',state.appt.filter(a=>a['วันนัด']===today).length);
   document.getElementById('patientPageSub').textContent=`ทั้งหมด ${state.patients.length} ราย`;
   document.getElementById('opdPageSub').textContent=`ทั้งหมด ${state.opd.length} ครั้ง`;
   document.getElementById('stockPageSub').textContent='ทั้งหมด 4 รายการ · ⚠️ ใกล้หมด 2 รายการ';
   document.getElementById('formulaPageSub').textContent=`ทั้งหมด ${state.formulas.length} ตำรับ`;
   document.getElementById('apptPageSub').textContent=`ทั้งหมด ${state.appt.length} นัด`;
-  updateDashboard();
+  document.getElementById('massagePageSub').textContent=`ทั้งหมด ${state.massage.length} นัด`;
+  updateDashboard(); updateRevenueStats();
   toast('🎯 Demo Mode — ข้อมูลจำลอง ไม่ได้บันทึกจริง','info');
 }
 
@@ -1879,6 +2212,336 @@ function toast(msg, type='info'){
   c.appendChild(t);
   setTimeout(()=>t.remove(),3500);
 }
+
+// ── LOAD MASSAGE DATA ──
+async function loadMassage(){
+  try{
+    const d=await sheetsGet(CONFIG.SHEET.massage+'!A:L');
+    state.massage=parseSheet(d.values||[]).sort((a,b)=>(b['วันที่']||'').localeCompare(a['วันที่']||''));
+  }catch(e){ state.massage=[]; }
+  filtered.massage=[...state.massage];
+  renderMassageTable();
+  const today=new Date().toISOString().split('T')[0];
+  const todayM=state.massage.filter(m=>m['วันที่']===today&&m['สถานะ']!=='ยกเลิก').length;
+  updateBadge('massageBadge',todayM);
+  document.getElementById('massagePageSub').textContent=`ทั้งหมด ${state.massage.length} นัด`;
+}
+async function loadServices(){
+  try{
+    const d=await sheetsGet(CONFIG.SHEET.services+'!A:G');
+    state.services=parseSheet(d.values||[]);
+  }catch(e){ state.services=getDefaultServices(); }
+  if(!state.services.length) state.services=getDefaultServices();
+  renderServiceGrid();
+  populateServiceSelect();
+}
+async function loadReceipts(){
+  try{
+    const d=await sheetsGet(CONFIG.SHEET.receipts+'!A:I');
+    state.receipts=parseSheet(d.values||[]).sort((a,b)=>(b['วันที่']||'').localeCompare(a['วันที่']||''));
+  }catch(e){ state.receipts=[]; }
+  filtered.receipts=[...state.receipts];
+  renderReceiptTable();
+  updateRevenueStats();
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('fReceiptDate').value=today;
+}
+function getDefaultServices(){
+  return [
+    {_row:2,ชื่อบริการ:'นวดแผนไทย',คำอธิบาย:'นวดแผนไทยโบราณ กดจุด เส้น แก้ปวดเมื่อย',ราคาต่อชั่วโมง:'300',ระยะเวลาขั้นต่ำ:'1',หมวดหมู่:'นวดแผนไทย',สถานะ:'เปิดให้บริการ',หมายเหตุ:''},
+    {_row:3,ชื่อบริการ:'นวดน้ำมัน',คำอธิบาย:'นวดด้วยน้ำมันอโรมาเธอราพี ผ่อนคลายกล้ามเนื้อ',ราคาต่อชั่วโมง:'400',ระยะเวลาขั้นต่ำ:'1',หมวดหมู่:'นวดน้ำมัน',สถานะ:'เปิดให้บริการ',หมายเหตุ:''},
+    {_row:4,ชื่อบริการ:'ประคบสมุนไพร',คำอธิบาย:'ประคบด้วยลูกประคบสมุนไพรไทยร้อน บรรเทาปวด',ราคาต่อชั่วโมง:'350',ระยะเวลาขั้นต่ำ:'1',หมวดหมู่:'ประคบสมุนไพร',สถานะ:'เปิดให้บริการ',หมายเหตุ:''},
+    {_row:5,ชื่อบริการ:'นวดเท้า-รีเฟล็กโซโลยี',คำอธิบาย:'กดจุดสะท้อนฝ่าเท้า เชื่อมโยงอวัยวะภายใน',ราคาต่อชั่วโมง:'250',ระยะเวลาขั้นต่ำ:'1',หมวดหมู่:'นวดเท้า',สถานะ:'เปิดให้บริการ',หมายเหตุ:''},
+    {_row:6,ชื่อบริการ:'นวดหน้า-ศีรษะ',คำอธิบาย:'นวดผ่อนคลายใบหน้า ศีรษะ คอ ลดปวดไมเกรน',ราคาต่อชั่วโมง:'300',ระยะเวลาขั้นต่ำ:'1',หมวดหมู่:'นวดหน้า/ศีรษะ',สถานะ:'เปิดให้บริการ',หมายเหตุ:''},
+    {_row:7,ชื่อบริการ:'นวดสปา+ประคบ (แพ็กเกจ)',คำอธิบาย:'นวดแผนไทย + ประคบสมุนไพร + พอกสมุนไพร',ราคาต่อชั่วโมง:'500',ระยะเวลาขั้นต่ำ:'2',หมวดหมู่:'บำบัดพิเศษ',สถานะ:'ยังไม่เปิดบริการ',หมายเหตุ:'รอหมอนวดที่ผ่านการอบรมเพิ่มเติม'},
+    {_row:8,ชื่อบริการ:'กัวซา (ขูดเส้น)',คำอธิบาย:'บำบัดด้วยการขูดเส้น ปรับสมดุลพลังงาน',ราคาต่อชั่วโมง:'350',ระยะเวลาขั้นต่ำ:'1',หมวดหมู่:'บำบัดพิเศษ',สถานะ:'ยังไม่เปิดบริการ',หมายเหตุ:'รอหมอนวดที่ผ่านการอบรม'},
+  ];
+}
+
+// ── RENDER ──
+function renderMassageTable(){
+  const tbody=document.getElementById('massageTableBody');
+  if(!filtered.massage.length){ tbody.innerHTML='<tr class="empty-row"><td colspan="9">ยังไม่มีนัดนวด</td></tr>'; return; }
+  tbody.innerHTML=filtered.massage.map(m=>`<tr>
+    <td><strong>${formatDate(m['วันที่'])}</strong><br><small style="color:var(--muted)">${m['เวลา']||''}</small></td>
+    <td><strong>${m['ชื่อลูกค้า']||'—'}</strong><br><small style="color:var(--muted)">${m['เบอร์โทร']||''}</small></td>
+    <td><span class="tag-pill">${m['บริการ']||'—'}</span></td>
+    <td style="font-size:.78rem;color:var(--muted)">${(m['ส่วนที่เน้น']||'—').substring(0,25)}</td>
+    <td style="text-align:center">${m['ชั่วโมง']||'—'}</td>
+    <td style="font-weight:700;color:var(--gold)">${m['ราคา']?Number(m['ราคา']).toLocaleString()+' ฿':'—'}</td>
+    <td style="font-size:.82rem">${m['หมอนวด']||'—'}</td>
+    <td><span class="tag-pill ${m['สถานะ']==='รอนวด'?'tag-status-wait':m['สถานะ']==='นวดแล้ว'?'tag-status-done':'tag-status-cancel'}">${m['สถานะ']||'—'}</span></td>
+    <td><div class="actions">
+      <button class="btn btn-secondary btn-sm" onclick="editMassage(${m._row})">✏️</button>
+      <button class="btn btn-gold btn-sm" onclick="quickReceipt('${m['ชื่อลูกค้า']}','${m['บริการ']} ${m['ชั่วโมง']}ชม.',${m['ราคา']||0})">🧾</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmDelete('massage',${m._row},'นัดนวด ${m['ชื่อลูกค้า']}')">🗑️</button>
+    </div></td>
+  </tr>`).join('');
+}
+function filterMassage(){
+  const q=document.getElementById('massageSearch').value.toLowerCase();
+  const s=document.getElementById('massageStatusFilter').value;
+  const d=document.getElementById('massageDateFilter').value;
+  filtered.massage=state.massage.filter(m=>{
+    const mQ=!q||(m['ชื่อลูกค้า']||'').toLowerCase().includes(q);
+    const mS=!s||m['สถานะ']===s;
+    const mD=!d||m['วันที่']===d;
+    return mQ&&mS&&mD;
+  });
+  renderMassageTable();
+}
+function renderServiceGrid(){
+  const grid=document.getElementById('serviceGrid');
+  if(!state.services.length){ grid.innerHTML='<div style="text-align:center;padding:3rem;color:var(--muted)">ยังไม่มีบริการ</div>'; return; }
+  grid.innerHTML=state.services.map(s=>{
+    const isOpen=s['สถานะ']==='เปิดให้บริการ';
+    return `<div class="service-card">
+      <div class="service-head">
+        <div>
+          <div class="service-name">${s['ชื่อบริการ']||'—'}</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:.2rem">${s['หมวดหมู่']||''} · ขั้นต่ำ ${s['ระยะเวลาขั้นต่ำ']||1} ชม.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.4rem">
+          <div class="service-price">${s['ราคาต่อชั่วโมง']?Number(s['ราคาต่อชั่วโมง']).toLocaleString()+' ฿/ชม.':'—'}</div>
+          <span class="${isOpen?'service-badge-available':'service-badge-unavailable'}">${s['สถานะ']||'—'}</span>
+        </div>
+      </div>
+      <div class="service-body">
+        <div style="flex:1">${s['คำอธิบาย']||''}</div>
+        ${s['หมายเหตุ']?`<div style="color:var(--orange)">⚠️ ${s['หมายเหตุ']}</div>`:''}
+      </div>
+      <div style="padding:.75rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:.5rem;justify-content:flex-end">
+        <button class="btn btn-secondary btn-sm" onclick="editService(${s._row})">✏️ แก้ไข</button>
+        ${isOpen?`<button class="btn btn-primary btn-sm" onclick="bookService('${s['ชื่อบริการ']}',${s['ราคาต่อชั่วโมง']||0})">📅 จองนัด</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+function renderReceiptTable(){
+  const tbody=document.getElementById('receiptTableBody');
+  if(!filtered.receipts.length){ tbody.innerHTML='<tr class="empty-row"><td colspan="7">ยังไม่มีใบเสร็จ</td></tr>'; return; }
+  tbody.innerHTML=filtered.receipts.map(r=>`<tr>
+    <td style="font-size:.82rem;color:var(--muted)">${r['เลขที่']||'—'}</td>
+    <td>${formatDate(r['วันที่'])}</td>
+    <td><strong>${r['ชื่อลูกค้า']||'—'}</strong></td>
+    <td style="font-size:.82rem">${r['บริการ']||'—'}</td>
+    <td style="font-weight:700;color:var(--gold)">${r['ยอดรวม']?Number(r['ยอดรวม']).toLocaleString()+' ฿':'—'}</td>
+    <td><span class="tag-pill">${r['ชำระโดย']||'—'}</span></td>
+    <td><div class="actions">
+      <button class="btn btn-gold btn-sm" onclick="printReceiptRow(${r._row})">🖨️</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmDelete('receipts',${r._row},'ใบเสร็จ ${r['เลขที่']}')">🗑️</button>
+    </div></td>
+  </tr>`).join('');
+}
+function filterReceipts(){
+  const q=document.getElementById('receiptSearch').value.toLowerCase();
+  const m=document.getElementById('receiptMonth').value;
+  filtered.receipts=state.receipts.filter(r=>{
+    const mQ=!q||(r['ชื่อลูกค้า']||'').toLowerCase().includes(q)||(r['บริการ']||'').includes(q);
+    const mM=!m||r['วันที่']?.startsWith(m);
+    return mQ&&mM;
+  });
+  renderReceiptTable();
+  updateRevenueStats();
+}
+function updateRevenueStats(){
+  const today=new Date().toISOString().split('T')[0];
+  const curM=new Date().toISOString().substring(0,7);
+  const todayRev=state.receipts.filter(r=>r['วันที่']===today).reduce((s,r)=>s+Number(r['ยอดรวม']||0),0);
+  const monthRev=state.receipts.filter(r=>r['วันที่']?.startsWith(curM)).reduce((s,r)=>s+Number(r['ยอดรวม']||0),0);
+  const monthCount=state.receipts.filter(r=>r['วันที่']?.startsWith(curM)).length;
+  document.getElementById('rev-today').textContent=todayRev.toLocaleString();
+  document.getElementById('rev-month').textContent=monthRev.toLocaleString();
+  document.getElementById('rev-count').textContent=monthCount;
+  document.getElementById('receiptPageSub').textContent=`ทั้งหมด ${state.receipts.length} ใบ`;
+  // dashboard
+  const dashM=document.getElementById('dash-massage-today');
+  const dashR=document.getElementById('dash-revenue-month');
+  if(dashM){ const todayN=state.massage.filter(m=>m['วันที่']===today&&m['สถานะ']!=='ยกเลิก').length; dashM.textContent=todayN; }
+  if(dashR) dashR.textContent=monthRev.toLocaleString();
+}
+
+// ── MASSAGE DRAWER ──
+function openMassageDrawer(data){
+  document.getElementById('massageDrawerTitle').textContent=data?'✏️ แก้ไขนัดนวด':'＋ เพิ่มนัดนวด';
+  document.getElementById('massageEditRow').value=data?data._row:'';
+  document.getElementById('fMassageName').value=data?data['ชื่อลูกค้า']:'';
+  document.getElementById('fMassagePhone').value=data?data['เบอร์โทร']:'';
+  document.getElementById('fMassageDate').value=data?data['วันที่']:new Date().toISOString().split('T')[0];
+  document.getElementById('fMassageTime').value=data?data['เวลา']:'09:00';
+  document.getElementById('fMassageService').value=data?data['บริการ']:'';
+  document.getElementById('fMassageHours').value=data?data['ชั่วโมง']:'1';
+  document.getElementById('fMassagePrice').value=data?data['ราคา']:'';
+  document.getElementById('fMassageNote').value=data?data['อาการ/ความต้องการ']:'';
+  document.getElementById('fMassageTherapist').value=data?data['หมอนวด']:'หมอนวดประจำคลินิก';
+  document.getElementById('fMassageStatus').value=data?data['สถานะ']:'รอนวด';
+  // reset body parts
+  document.querySelectorAll('.body-part').forEach(el=>{ el.classList.remove('selected'); });
+  if(data&&data['ส่วนที่เน้น']){
+    const parts=data['ส่วนที่เน้น'].split(',');
+    document.querySelectorAll('.body-part').forEach(el=>{ if(parts.some(p=>el.textContent.trim().includes(p.trim()))) el.classList.add('selected'); });
+  }
+  openDrawer('massage');
+}
+function editMassage(row){ const m=state.massage.find(x=>x._row===row); if(m) openMassageDrawer(m); }
+function closeMassageDrawer(){ closeDrawer('massage'); }
+function toggleBodyPart(el){ el.classList.toggle('selected'); }
+function updateMassagePrice(){
+  const svc=document.getElementById('fMassageService').value;
+  const hrs=parseFloat(document.getElementById('fMassageHours').value)||1;
+  const found=state.services.find(s=>s['ชื่อบริการ']===svc);
+  if(found&&found['ราคาต่อชั่วโมง']){
+    document.getElementById('fMassagePrice').value=Math.round(Number(found['ราคาต่อชั่วโมง'])*hrs);
+  }
+}
+function populateServiceSelect(){
+  const opts=state.services.filter(s=>s['สถานะ']==='เปิดให้บริการ').map(s=>`<option value="${s['ชื่อบริการ']}">${s['ชื่อบริการ']} (${Number(s['ราคาต่อชั่วโมง']||0).toLocaleString()} ฿/ชม.)</option>`).join('');
+  const el=document.getElementById('fMassageService');
+  if(el) el.innerHTML='<option value="">— เลือกบริการ —</option>'+opts;
+}
+function bookService(name, price){
+  openMassageDrawer();
+  setTimeout(()=>{ document.getElementById('fMassageService').value=name; updateMassagePrice(); },100);
+}
+async function saveMassage(){
+  const name=document.getElementById('fMassageName').value.trim();
+  if(!name){ toast('กรุณาใส่ชื่อลูกค้า','error'); return; }
+  const bodyParts=Array.from(document.querySelectorAll('.body-part.selected')).map(el=>el.textContent.trim().replace(/^[^\s]+\s/,'')).join(', ');
+  const row=document.getElementById('massageEditRow').value;
+  const vals=[[
+    genId(), document.getElementById('fMassageDate').value,
+    document.getElementById('fMassageTime').value, name,
+    document.getElementById('fMassagePhone').value,
+    document.getElementById('fMassageService').value,
+    document.getElementById('fMassageHours').value,
+    document.getElementById('fMassagePrice').value,
+    bodyParts, document.getElementById('fMassageNote').value,
+    document.getElementById('fMassageTherapist').value,
+    document.getElementById('fMassageStatus').value
+  ]];
+  try{
+    if(state.demo){ toast('Demo Mode — ไม่บันทึกจริง','info'); closeMassageDrawer(); return; }
+    if(row) await sheetsUpdate(`${CONFIG.SHEET.massage}!A${row}:L${row}`,vals);
+    else await sheetsAppend(CONFIG.SHEET.massage,vals);
+    await loadMassage(); updateRevenueStats();
+    toast('✅ บันทึกนัดนวดแล้ว','success'); closeMassageDrawer();
+  }catch(e){ toast('บันทึกไม่สำเร็จ: '+e.message,'error'); }
+}
+async function saveMassageAndReceipt(){
+  await saveMassage();
+  const name=document.getElementById('fMassageName').value.trim();
+  const svc=document.getElementById('fMassageService').value;
+  const hrs=document.getElementById('fMassageHours').value;
+  const price=document.getElementById('fMassagePrice').value;
+  quickReceipt(name,`${svc} ${hrs} ชม.`,price);
+}
+
+// ── SERVICE DRAWER ──
+function openServiceDrawer(data){
+  document.getElementById('serviceDrawerTitle').textContent=data?'✏️ แก้ไขบริการ':'＋ เพิ่มบริการนวด';
+  document.getElementById('serviceEditRow').value=data?data._row:'';
+  document.getElementById('fServiceName').value=data?data['ชื่อบริการ']:'';
+  document.getElementById('fServiceDesc').value=data?data['คำอธิบาย']:'';
+  document.getElementById('fServicePrice').value=data?data['ราคาต่อชั่วโมง']:'';
+  document.getElementById('fServiceMinHours').value=data?data['ระยะเวลาขั้นต่ำ']:'1';
+  document.getElementById('fServiceCat').value=data?data['หมวดหมู่']:'นวดแผนไทย';
+  document.getElementById('fServiceStatus').value=data?data['สถานะ']:'เปิดให้บริการ';
+  document.getElementById('fServiceNote').value=data?data['หมายเหตุ']:'';
+  openDrawer('service');
+}
+function editService(row){ const s=state.services.find(x=>x._row===row); if(s) openServiceDrawer(s); }
+function closeServiceDrawer(){ closeDrawer('service'); }
+async function saveService(){
+  const name=document.getElementById('fServiceName').value.trim();
+  if(!name){ toast('กรุณาใส่ชื่อบริการ','error'); return; }
+  const row=document.getElementById('serviceEditRow').value;
+  const vals=[[
+    name, document.getElementById('fServiceDesc').value,
+    document.getElementById('fServicePrice').value,
+    document.getElementById('fServiceMinHours').value,
+    document.getElementById('fServiceCat').value,
+    document.getElementById('fServiceStatus').value,
+    document.getElementById('fServiceNote').value
+  ]];
+  try{
+    if(state.demo){
+      // อัปเดต demo state โดยตรง
+      const obj={_row:row?Number(row):state.services.length+2,ชื่อบริการ:vals[0][0],คำอธิบาย:vals[0][1],ราคาต่อชั่วโมง:vals[0][2],ระยะเวลาขั้นต่ำ:vals[0][3],หมวดหมู่:vals[0][4],สถานะ:vals[0][5],หมายเหตุ:vals[0][6]};
+      if(row){ const idx=state.services.findIndex(x=>x._row===Number(row)); if(idx>=0) state.services[idx]=obj; }
+      else state.services.push(obj);
+      renderServiceGrid(); populateServiceSelect();
+      toast('Demo Mode — บันทึกชั่วคราว','info'); closeServiceDrawer(); return;
+    }
+    if(row) await sheetsUpdate(`${CONFIG.SHEET.services}!A${row}:G${row}`,vals);
+    else await sheetsAppend(CONFIG.SHEET.services,vals);
+    await loadServices();
+    toast('✅ บันทึกบริการแล้ว','success'); closeServiceDrawer();
+  }catch(e){ toast('บันทึกไม่สำเร็จ: '+e.message,'error'); }
+}
+
+// ── RECEIPT DRAWER ──
+function openReceiptDrawer(data){
+  document.getElementById('receiptDrawerTitle').textContent=data?'✏️ แก้ไขใบเสร็จ':'🧾 ออกใบเสร็จ';
+  document.getElementById('receiptEditRow').value=data?data._row:'';
+  document.getElementById('fReceiptNo').value=data?data['เลขที่']:'REC-'+new Date().getFullYear()+'-'+String(state.receipts.length+1).padStart(4,'0');
+  document.getElementById('fReceiptDate').value=data?data['วันที่']:new Date().toISOString().split('T')[0];
+  document.getElementById('fReceiptName').value=data?data['ชื่อลูกค้า']:'';
+  document.getElementById('fReceiptService').value=data?data['บริการ']:'';
+  document.getElementById('fReceiptAmount').value=data?data['ราคา']:'';
+  document.getElementById('fReceiptDiscount').value=data?data['ส่วนลด']:'0';
+  document.getElementById('fReceiptPayment').value=data?data['ชำระโดย']:'เงินสด';
+  document.getElementById('fReceiptNote').value=data?data['หมายเหตุ']:'';
+  calcReceiptTotal();
+  openDrawer('receipt');
+}
+function quickReceipt(name, service, price){
+  openReceiptDrawer();
+  setTimeout(()=>{
+    document.getElementById('fReceiptName').value=name||'';
+    document.getElementById('fReceiptService').value=service||'';
+    document.getElementById('fReceiptAmount').value=price||'';
+    calcReceiptTotal();
+  },100);
+}
+function closeReceiptDrawer(){ closeDrawer('receipt'); }
+function calcReceiptTotal(){
+  const amt=Number(document.getElementById('fReceiptAmount').value)||0;
+  const disc=Number(document.getElementById('fReceiptDiscount').value)||0;
+  document.getElementById('fReceiptTotal').value=(amt-disc).toLocaleString()+' บาท';
+}
+document.addEventListener('input',e=>{
+  if(['fReceiptAmount','fReceiptDiscount'].includes(e.target.id)) calcReceiptTotal();
+});
+async function saveReceipt(){
+  const name=document.getElementById('fReceiptName').value.trim();
+  const amt=document.getElementById('fReceiptAmount').value;
+  if(!name||!amt){ toast('กรุณาใส่ชื่อลูกค้าและราคา','error'); return; }
+  const disc=Number(document.getElementById('fReceiptDiscount').value)||0;
+  const total=Number(amt)-disc;
+  const row=document.getElementById('receiptEditRow').value;
+  const vals=[[
+    document.getElementById('fReceiptNo').value,
+    document.getElementById('fReceiptDate').value,
+    name, document.getElementById('fReceiptService').value,
+    amt, disc, total,
+    document.getElementById('fReceiptPayment').value,
+    document.getElementById('fReceiptNote').value
+  ]];
+  try{
+    if(state.demo){ toast('Demo Mode — ไม่บันทึกจริง','info'); closeReceiptDrawer(); return; }
+    if(row) await sheetsUpdate(`${CONFIG.SHEET.receipts}!A${row}:I${row}`,vals);
+    else await sheetsAppend(CONFIG.SHEET.receipts,vals);
+    await loadReceipts();
+    toast('✅ บันทึกใบเสร็จแล้ว','success'); closeReceiptDrawer();
+  }catch(e){ toast('บันทึกไม่สำเร็จ: '+e.message,'error'); }
+}
+function printReceipt(){ toast('🖨️ ฟีเจอร์พิมพ์ใบเสร็จจะพัฒนาต่อ','info'); }
+function printReceiptRow(row){ toast('🖨️ ฟีเจอร์พิมพ์ใบเสร็จจะพัฒนาต่อ','info'); }
+
+// ── LOAD MASSAGE SHEET FOR DELETE ──
+const _origConfirmDelete = confirmDelete;
+// extend confirmDelete to support massage/services/receipts sheets
+const _massageSheets = {massage:CONFIG?.SHEET?.massage||'นัดหมายนวด',services:CONFIG?.SHEET?.services||'บริการนวด',receipts:CONFIG?.SHEET?.receipts||'ใบเสร็จ'};
 
 // ── INIT ──
 loadSettings();
