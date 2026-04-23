@@ -91,7 +91,11 @@ nav{position:sticky;top:0;z-index:100;background:rgba(26,58,42,.96);backdrop-fil
 .taste-ex{font-size:.7rem;padding:.13rem .5rem;background:#e8f5e9;border-radius:50px;color:var(--green-mid);font-weight:600}
 
 .pikad-section{background:var(--paper);padding:3rem 2rem}
-.pikad-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.5rem;max-width:1200px;margin:1.5rem auto 0}
+.pikad-group{max-width:1200px;margin:0 auto 2.5rem}
+.pikad-group-title{display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:2px solid rgba(82,183,136,.3)}
+.pikad-group-label{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--green-deep)}
+.pikad-group-badge{padding:.2rem .75rem;border-radius:50px;background:var(--green-mid);color:white;font-size:.72rem;font-weight:700;letter-spacing:.06em}
+.pikad-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.5rem}
 .pikad-card{background:white;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.06);cursor:pointer;transition:all .3s;border:1px solid rgba(82,183,136,.1)}
 .pikad-card:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(26,58,42,.13)}
 .pikad-head{padding:1.3rem 1.5rem .9rem;display:flex;align-items:flex-start;gap:1rem}
@@ -216,7 +220,7 @@ footer span{color:var(--green-light)}
   <div style="max-width:1200px;margin:0 auto">
     <div class="section-head"><h2 class="section-title">พิกัดยาไทย</h2><span class="section-count" id="pikadCount"></span></div>
     <div id="pikadLoading" class="loading-screen"><div class="spinner"></div><div class="loading-text">กำลังโหลด...</div></div>
-    <div class="pikad-grid" id="pikadGrid"></div>
+    <div id="pikadGrid"></div>
   </div>
 </section>
 
@@ -305,6 +309,7 @@ async function init(){
 async function loadHerbs(){
   try{
     herbsData=await fetchSheet(SHEETS.herbs);
+    herbsData.sort((a,b)=>(a['ชื่อไทย']||'').localeCompare(b['ชื่อไทย']||'','th'));
     document.getElementById('herbsLoading').style.display='none';
     buildFilters(); renderHerbs();
     document.getElementById('statHerbs').textContent=herbsData.length;
@@ -483,23 +488,50 @@ async function loadPikad(){
     document.getElementById('pikadLoading').style.display='none';
     const grid=document.getElementById('pikadGrid');
     grid.innerHTML='';
-    pikadData.forEach((p,i)=>{
-      const col=BADGE[i%BADGE.length];
-      const ings=split(p['ตัวยา_ชื่อ']||p['ตัวยา_id']);
-      const uses=split(p['สรรพคุณรวม']).slice(0,3);
-      const card=document.createElement('div');
-      card.className='pikad-card';
-      card.onclick=()=>openPikadModal(p,col);
-      card.innerHTML=`
-        <div class="pikad-head">
-          <div class="pikad-badge" style="background:${col.bg};color:${col.t}">${p['จำนวนตัวยา']||'?'}</div>
-          <div><div class="pikad-name">${p['ชื่อพิกัด']||'—'}</div><div class="pikad-meaning">${p['ความหมาย']||''}</div></div>
-        </div>
-        <div class="pikad-ing-pills">${ings.map(s=>`<span class="pikad-ing">${s}</span>`).join('')}</div>
-        <p class="pikad-desc">${(p['วิธีเตรียม']||'').substring(0,90)}${(p['วิธีเตรียม']||'').length>90?'...':''}</p>
-        <div class="pikad-uses">${uses.map(u=>`<span class="pikad-use">${u}</span>`).join('')}</div>`;
-      grid.appendChild(card);
+
+    // จัดกลุ่มตามจำนวนตัวยา
+    const groups={};
+    pikadData.forEach(p=>{
+      const count=parseInt(p['จำนวนตัวยา'])||0;
+      if(!groups[count])groups[count]=[];
+      groups[count].push(p);
     });
+    const groupLabels={2:'กลุ่ม 2 — ทวิ',3:'กลุ่ม 3 — ตรี',4:'กลุ่ม 4 — จตุร',5:'กลุ่ม 5 — เบญจ',7:'กลุ่ม 7 — สัตต',8:'กลุ่ม 8 — อัฏฐ',9:'กลุ่ม 9 — นว',10:'กลุ่ม 10 — ทศ'};
+    const sortedCounts=Object.keys(groups).map(Number).sort((a,b)=>a-b);
+
+    sortedCounts.forEach(count=>{
+      const items=groups[count].sort((a,b)=>(a['ชื่อพิกัด']||'').localeCompare(b['ชื่อพิกัด']||'','th'));
+      const label=groupLabels[count]||`กลุ่ม ${count} ตัวยา`;
+
+      const groupEl=document.createElement('div');
+      groupEl.className='pikad-group';
+      groupEl.innerHTML=`<div class="pikad-group-title">
+        <span class="pikad-group-label">⚗️ ${label}</span>
+        <span class="pikad-group-badge">${items.length} พิกัด</span>
+      </div>
+      <div class="pikad-grid" id="pikadGroup_${count}"></div>`;
+      grid.appendChild(groupEl);
+
+      const groupGrid=groupEl.querySelector('.pikad-grid');
+      items.forEach((p,i)=>{
+        const col=BADGE[i%BADGE.length];
+        const ings=split(p['ตัวยา_ชื่อ']||p['ตัวยา_id']);
+        const uses=split(p['สรรพคุณรวม']).slice(0,3);
+        const card=document.createElement('div');
+        card.className='pikad-card';
+        card.onclick=()=>openPikadModal(p,col);
+        card.innerHTML=`
+          <div class="pikad-head">
+            <div class="pikad-badge" style="background:${col.bg};color:${col.t}">${p['จำนวนตัวยา']||'?'}</div>
+            <div><div class="pikad-name">${p['ชื่อพิกัด']||'—'}</div><div class="pikad-meaning">${p['ความหมาย']||''}</div></div>
+          </div>
+          <div class="pikad-ing-pills">${ings.map(s=>`<span class="pikad-ing">${s}</span>`).join('')}</div>
+          <p class="pikad-desc">${(p['วิธีเตรียม']||'').substring(0,90)}${(p['วิธีเตรียม']||'').length>90?'...':''}</p>
+          <div class="pikad-uses">${uses.map(u=>`<span class="pikad-use">${u}</span>`).join('')}</div>`;
+        groupGrid.appendChild(card);
+      });
+    });
+
     if(!pikadData.length)grid.innerHTML='<div class="no-data">ยังไม่มีข้อมูลพิกัดยาใน Google Sheet ครับ</div>';
     document.getElementById('statPikad').textContent=pikadData.length;
     document.getElementById('pikadCount').textContent=`${pikadData.length} พิกัด`;
