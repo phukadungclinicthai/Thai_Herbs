@@ -575,7 +575,7 @@ body{font-family:'Sarabun',sans-serif;background:#f0f4f1;color:var(--ink);min-he
   </div>
   <div class="drawer-footer">
     <button class="btn btn-secondary" onclick="closeHerbDrawer()">ยกเลิก</button>
-    <button class="btn btn-primary" onclick="saveHerb()">💾 บันทึก</button>
+    <button class="btn btn-primary" id="herbSaveBtn" onclick="saveHerb()">💾 บันทึก</button>
   </div>
 </div>
 
@@ -1090,6 +1090,17 @@ async function saveHerb(){
     document.getElementById('fHerbRelated').value
   ];
   if(!vals[1]){ toast('กรุณาใส่ชื่อไทย','error'); return; }
+
+  // ── ตรวจสอบชื่อซ้ำ (เช็ค ชื่อไทย) ──
+  const nameTh = vals[1].trim();
+  const duplicate = state.herbs.find(h => h['ชื่อไทย'] && h['ชื่อไทย'].trim() === nameTh && String(h._row) !== String(row));
+  if(duplicate){ toast('⚠️ มีสมุนไพรชื่อ "' + nameTh + '" อยู่แล้ว ไม่สามารถบันทึกซ้ำได้', 'error'); return; }
+
+  // ── ล็อกปุ่ม + แสดงสถานะกำลังบันทึก ──
+  const saveBtn = document.getElementById('herbSaveBtn');
+  const origText = saveBtn ? saveBtn.textContent : '';
+  if(saveBtn){ saveBtn.disabled = true; saveBtn.textContent = '⏳ กำลังบันทึก...'; }
+
   try{
     if(state.demo){
       if(row){ const i=state.herbs.findIndex(x=>x._row==row); if(i>=0){ const keys=['id','ชื่อไทย','ชื่อท้องถิ่น','ชื่ออังกฤษ','ชื่อวิทยาศาสตร์','หมวดสรรพคุณ','รสยา','ส่วนที่ใช้','ฤทธิ์','ลักษณะทางพฤกษศาสตร์','สรรพคุณแยกตามส่วน','วิธีใช้','ปริมาณที่แนะนำ','ข้อควรระวัง','ข้อห้ามใช้','แหล่งอ้างอิง','รูปภาพ_URL','สมุนไพรที่เกี่ยวข้อง']; keys.forEach((k,j)=>state.herbs[i][k]=vals[j]); }}
@@ -1103,7 +1114,11 @@ async function saveHerb(){
     updateDashboard();
     toast('✅ บันทึกสมุนไพรแล้ว','success');
     closeHerbDrawer();
-  }catch(e){ toast('เกิดข้อผิดพลาด: '+e.message,'error'); }
+  }catch(e){
+    toast('เกิดข้อผิดพลาด: '+e.message,'error');
+  }finally{
+    if(saveBtn){ saveBtn.disabled = false; saveBtn.textContent = origText; }
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -1199,17 +1214,27 @@ function confirmDelete(type, row, name){
   document.getElementById('confirmOkBtn').onclick = executeDelete;
   document.getElementById('confirmOverlay').classList.add('open');
 }
-function closeConfirm(){ document.getElementById('confirmOverlay').classList.remove('open'); pendingDelete=null; }
+function closeConfirm(){
+  document.getElementById('confirmOverlay').classList.remove('open');
+  // ไม่ล้าง pendingDelete ที่นี่ — ให้ executeDelete จัดการเอง
+}
 async function executeDelete(){
-  closeConfirm();
   if(!pendingDelete) return;
-  const {type,row} = pendingDelete;
+  const {type, row} = pendingDelete;
+  pendingDelete = null;
+  document.getElementById('confirmOverlay').classList.remove('open');
+
+  const okBtn = document.getElementById('confirmOkBtn');
+  if(okBtn){ okBtn.disabled = true; okBtn.textContent = '⏳ กำลังลบ...'; }
+
   if(state.demo){
     if(type==='herb'){ state.herbs=state.herbs.filter(x=>x._row!==row); herbsFiltered=[...state.herbs]; renderHerbTable(); }
     else if(type==='taste') state.tastes=state.tastes.filter(x=>x._row!==row), renderTasteTable();
     else if(type==='pikad') state.pikad=state.pikad.filter(x=>x._row!==row), renderPikadTable();
     else if(type==='ref') state.refs=state.refs.filter(x=>x._row!==row), renderRefTable();
-    updateDashboard(); toast('🗑️ ลบแล้ว (Demo Mode)','success'); return;
+    updateDashboard();
+    if(okBtn){ okBtn.disabled = false; okBtn.textContent = 'ลบ'; }
+    toast('🗑️ ลบแล้ว (Demo Mode)','success'); return;
   }
   try{
     const sheetMap={herb:CONFIG.SHEET_NAMES.herbs,taste:CONFIG.SHEET_NAMES.tastes,pikad:CONFIG.SHEET_NAMES.pikad,ref:CONFIG.SHEET_NAMES.refs};
@@ -1221,7 +1246,11 @@ async function executeDelete(){
     else if(type==='pikad') await loadPikadData();
     else await loadRefsData();
     updateDashboard();
-  }catch(e){ toast('เกิดข้อผิดพลาด: '+e.message,'error'); }
+  }catch(e){
+    toast('เกิดข้อผิดพลาด: '+e.message,'error');
+  }finally{
+    if(okBtn){ okBtn.disabled = false; okBtn.textContent = 'ลบ'; }
+  }
 }
 
 // ═══════════════════════════════════════════════
